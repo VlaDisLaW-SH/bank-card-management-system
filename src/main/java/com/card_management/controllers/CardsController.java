@@ -57,4 +57,16 @@ public class CardsController {
     public void remove(@PathVariable Long id) {
         cardService.delete(id);
     }
+
+    @GetMapping(path = "/userCards/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<CardEnvelopDto> getUserCards(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sort
+    ) {
+        CardEnvelopDto cardEnvelopDto = cardService.getUserCards(userId, page, size, sort);
+        return ResponseEntity.ok(cardEnvelopDto);
+    }
 }
