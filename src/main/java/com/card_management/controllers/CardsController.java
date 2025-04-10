@@ -3,6 +3,7 @@ package com.card_management.controllers;
 import com.card_management.cards_api.dto.CardCreateDto;
 import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.dto.CardEnvelopDto;
+import com.card_management.cards_api.dto.CardNumberDto;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.technical.exception.CustomValidationException;
 import jakarta.validation.Valid;
@@ -68,5 +69,12 @@ public class CardsController {
     ) {
         CardEnvelopDto cardEnvelopDto = cardService.getUserCards(userId, page, size, sort);
         return ResponseEntity.ok(cardEnvelopDto);
+    }
+
+    @GetMapping(path = "/getNumberCard/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<CardNumberDto> getNumberCard(@PathVariable Long id) {
+        var numberCard = cardService.getNumberCard(id);
+        return ResponseEntity.ok(numberCard);
     }
 }

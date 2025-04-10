@@ -1,16 +1,13 @@
 package com.card_management.cards_api.dto;
 
 import com.card_management.cards_api.enumeration.CardStatus;
-import com.card_management.users_api.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -20,14 +17,14 @@ public class CardDto {
     private Long id;
 
     /**
-     * Номер карты
+     * Замаскированный номер карты в формате 0000****0000
      */
-    private String cardNumber;
+    private String maskNumber;
 
     /**
-     * Владелец карты
+     * UUID владельца карты
      */
-    private UserDto owner;
+    private UUID ownerUuid;
 
     /**
      * Месяц окончания действия карты

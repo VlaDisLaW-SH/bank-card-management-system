@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.CreditCardNumber;
 
 @Setter
 @Getter
@@ -16,7 +17,8 @@ public class CardCreateDto {
      */
     @NotNull
     @NotBlank
-    @Size(max = 16)
+    @Size(min = 16, max = 16)
+    @CreditCardNumber
     private String cardNumber;
 
     /**
@@ -42,9 +44,4 @@ public class CardCreateDto {
     @NotNull
     @NotBlank
     private String status;
-
-    /**
-     * Баланс карты
-     */
-    private Long balance;
 }

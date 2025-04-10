@@ -16,3 +16,6 @@ spring:
   output:
     ansi:
       enabled: always
+card:
+  encryptor:
+    password: ${CARD_ENCRYPTOR_PASSWORD}

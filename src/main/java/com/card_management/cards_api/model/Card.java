@@ -3,18 +3,17 @@ package com.card_management.cards_api.model;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.users_api.model.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 /**
  * Банковская карта
@@ -32,10 +31,23 @@ public class Card {
     private Long id;
 
     /**
+     * UUID карты
+     */
+    @UuidGenerator
+    @Column(name = "uuid", nullable = false, updatable = false, unique = true)
+    private UUID uuid;
+
+    /**
      * Зашифрованный номер карты
      */
-    @Column(name = "number")
+    @Column(nullable = false, name = "encrypted_card_number")
     private String encryptedCardNumber;
+
+    /**
+     * Замаскированный номер карты в формате 0000****0000
+     */
+    @Column(name = "mask_number")
+    private String maskNumber;
 
     /**
      * Владелец карты
@@ -71,13 +83,18 @@ public class Card {
      * Баланс карты
      */
     @NotNull
-    private Long balance;
+    private Long balance = 0L;
 
     /**
      * Список транзакций
      */
     //@OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<Transaction> transactions = new ArrayList<>();
+
+    /**
+     * Соль для расшифровки номера карты
+     */
+    private String saltNumberCard;
 
     /**
      * Дата и время создания карты
