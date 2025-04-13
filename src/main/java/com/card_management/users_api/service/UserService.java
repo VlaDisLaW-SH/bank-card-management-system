@@ -1,5 +1,6 @@
 package com.card_management.users_api.service;
 
+import com.card_management.limits_api.service.LimitService;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.users_api.dto.UserCreateDto;
 import com.card_management.users_api.dto.UserDto;
@@ -19,6 +20,8 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
+
+    private final LimitService limitService;
 
     public UserEnvelopDto getUsers(int page, int size, String sort) {
         var pageRequest = PageRequest.of(page - 1, size, Sort.by(sort));
@@ -45,6 +48,7 @@ public class UserService {
         }
         var user = userMapper.map(userDto);
         userRepository.save(user);
+        limitService.setDefaultLimits(user);
         return userMapper.map(user);
     }
 

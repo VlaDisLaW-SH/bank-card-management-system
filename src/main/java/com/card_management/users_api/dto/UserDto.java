@@ -7,12 +7,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Setter
 @Getter
 @NoArgsConstructor
 public class UserDto {
     private Long id;
+
+    /**
+     * UUID пользователя
+     */
+    private UUID uuid;
 
     /**
      * Фамилия
@@ -27,7 +33,7 @@ public class UserDto {
     /**
      * Отчество
      */
-    private String patronymic;
+    private String middleName;
 
     /**
      * Адрес электронной почты

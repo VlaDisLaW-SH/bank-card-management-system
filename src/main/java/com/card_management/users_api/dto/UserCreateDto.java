@@ -25,7 +25,7 @@ public class UserCreateDto {
     /**
      * Отчество
      */
-    private String patronymic;
+    private String middleName;
 
     /**
      * Адрес электронной почты
