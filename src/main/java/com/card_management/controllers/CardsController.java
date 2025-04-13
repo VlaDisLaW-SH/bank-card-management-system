@@ -3,7 +3,6 @@ package com.card_management.controllers;
 import com.card_management.cards_api.dto.CardCreateDto;
 import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.dto.CardEnvelopDto;
-import com.card_management.cards_api.dto.CardNumberDto;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.technical.exception.CustomValidationException;
 import jakarta.validation.Valid;
@@ -12,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/cards")
@@ -61,20 +62,8 @@ public class CardsController {
 
     @GetMapping(path = "/userCards/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<CardEnvelopDto> getUserCards(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sort
-    ) {
-        CardEnvelopDto cardEnvelopDto = cardService.getUserCards(userId, page, size, sort);
-        return ResponseEntity.ok(cardEnvelopDto);
-    }
-
-    @GetMapping(path = "/getNumberCard/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<CardNumberDto> getNumberCard(@PathVariable Long id) {
-        var numberCard = cardService.getNumberCard(id);
-        return ResponseEntity.ok(numberCard);
+    public ResponseEntity<List<CardDto>> getUserCards(@PathVariable Long userId) {
+        List<CardDto> cardDtoList = cardService.getUserCards(userId);
+        return ResponseEntity.ok(cardDtoList);
     }
 }

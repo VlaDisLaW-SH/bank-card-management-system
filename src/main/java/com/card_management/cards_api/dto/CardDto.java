@@ -44,13 +44,7 @@ public class CardDto {
     /**
      * Баланс карты
      */
-    private Long balance;
-
-    /**
-     * Список транзакций
-     */
-    //@JsonInclude(JsonInclude.Include.NON_EMPTY)
-    //private List<Transaction> comments = new ArrayList<>();
+    private Integer balance;
 
     /**
      * Дата и время создания карты

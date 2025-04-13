@@ -44,4 +44,6 @@ public class CardCreateDto {
     @NotNull
     @NotBlank
     private String status;
+
+    private Integer balance;
 }

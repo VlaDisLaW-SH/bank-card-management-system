@@ -11,9 +11,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Schema(enumAsRef = true)
 public enum CardStatus {
-    ACTIVE("Карта активна"),
-    BLOCKED("Карта заблокирована"),
-    EXPIRED("У карты истек срок действия");
+    ACTIVE("Карта активна."),
+    BLOCKED("Карта заблокирована."),
+    EXPIRED("У карты истек срок действия.");
 
     private final String description;
 }

@@ -1,6 +1,7 @@
 package com.card_management.cards_api.model;
 
 import com.card_management.cards_api.enumeration.CardStatus;
+import com.card_management.transaction_api.model.Transaction;
 import com.card_management.users_api.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +14,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -83,13 +86,19 @@ public class Card {
      * Баланс карты
      */
     @NotNull
-    private Long balance = 0L;
+    private Integer balance;
 
     /**
-     * Список транзакций
+     * Список исходящих транзакций
      */
-    //@OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Transaction> transactions = new ArrayList<>();
+    @OneToMany(mappedBy = "source", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> outgoingTransactions = new ArrayList<>();
+
+    /**
+     * Список входящих транзакций
+     */
+    @OneToMany(mappedBy = "destination", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> incomingTransactions = new ArrayList<>();
 
     /**
      * Соль для расшифровки номера карты

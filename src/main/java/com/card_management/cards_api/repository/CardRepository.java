@@ -1,8 +1,6 @@
 package com.card_management.cards_api.repository;
 
 import com.card_management.cards_api.model.Card;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +16,5 @@ public interface CardRepository extends JpaRepository<Card, Long> {
      * @param userId ID пользователя
      * @return список карт
      */
-    Page<Card> findByOwnerId(Long userId, Pageable pageable);
+    List<Card> findByOwnerId(Long userId);
 }

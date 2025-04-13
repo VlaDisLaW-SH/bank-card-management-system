@@ -4,8 +4,10 @@ import com.card_management.application.configuration.AppConfig;
 import com.card_management.cards_api.dto.CardCreateDto;
 import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.dto.CardEnvelopDto;
-import com.card_management.cards_api.dto.CardNumberDto;
+import com.card_management.cards_api.enumeration.CardStatus;
+import com.card_management.cards_api.exception.BlockedCardException;
 import com.card_management.cards_api.mapper.CardMapper;
+import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.repository.CardRepository;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.technical.util.CardEncryptor;
@@ -14,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +31,6 @@ public class CardService {
     private final CardMapper cardMapper;
 
     private final UserRepository userRepository;
-
-    private final CardEncryptor cardEncryptor;
 
     private final AppConfig appConfig;
 
@@ -51,10 +54,14 @@ public class CardService {
     }
 
     public CardDto create(CardCreateDto cardDto) {
+        userRepository.findById(cardDto.getOwnerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с ID " + cardDto.getOwnerId()
+                        + " не найден"));
         var card = cardMapper.map(cardDto);
-        var encryptedCardNumber = cardEncryptor.encryptCardNumber(cardDto.getCardNumber());
-        card.setEncryptedCardNumber(encryptedCardNumber);
-        var salt = appConfig.getSaltCard();
+        var salt = KeyGenerators.string().generateKey();
+        var coder = new CardEncryptor(appConfig.getPassword(), salt);
+        var coderNumber = coder.encryptCardNumber(cardDto.getCardNumber());
+        card.setEncryptedCardNumber(coderNumber);
         card.setSaltNumberCard(salt);
         cardRepository.save(card);
         return cardMapper.map(card);
@@ -66,25 +73,39 @@ public class CardService {
         cardRepository.delete(card);
     }
 
-    public CardEnvelopDto getUserCards(Long userId, int page, int size, String sort) {
+    public List<CardDto> getUserCards(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с ID " + userId + " не найден"));
-        var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
-        var cardPage = cardRepository.findByOwnerId(userId, pageRequest);
-        var cardDto = cardPage.stream()
+        var listCards = cardRepository.findByOwnerId(userId);
+        return listCards.stream()
                 .map(cardMapper::map)
                 .toList();
-        return new CardEnvelopDto(
-                cardDto,
-                cardPage.getTotalElements(),
-                cardPage.getTotalPages()
-        );
     }
 
-    public CardNumberDto getNumberCard(Long cardId) {
-        var card = cardRepository.findById(cardId)
-                .orElseThrow(() -> new ResourceNotFoundException("Карта с ID " + cardId + " не найдена"));
-        var decryptedCardNumber = cardEncryptor.decryptCardNumber(card.getEncryptedCardNumber());
-        return cardMapper.map(decryptedCardNumber);
+    public Card findMatchByNumberCard(String numberCard, Long userId) {
+        Card cardSought = null;
+        var listCards = cardRepository.findByOwnerId(userId);
+        for (Card card: listCards) {
+            if (decryptCardNumber(card).equals(numberCard)) {
+                cardSought = card;
+            }
+        }
+        if (cardSought == null) {
+            throw new ResourceNotFoundException("Карта с номером " + numberCard
+                    + " не принадлежит пользователю с ID " + userId);
+        }
+        return cardSought;
+    }
+
+    private String decryptCardNumber(Card card) {
+        var decoder = new CardEncryptor(appConfig.getPassword(), card.getSaltNumberCard());
+        return decoder.decryptCardNumber(card.getEncryptedCardNumber());
+    }
+
+    public void checkCardStatus(Card card) {
+        if(!card.getStatus().equals(CardStatus.ACTIVE)) {
+            throw new BlockedCardException("Операция не может быть совершена. " + card.getStatus().getDescription()
+                    + " Номер карты: " + card.getMaskNumber());
+        }
     }
 }
