@@ -26,6 +26,18 @@ public interface LimitRepository extends JpaRepository<Limit, Long> {
             TransactionType transactionType);
 
     /**
+     * Получает лимит пользователя по типу лимита и типу транзакции
+     * @param userId ID пользователя
+     * @param limitType тип лимита
+     * @param transactionType тип транзакции
+     * @return лимит
+     */
+    Limit getLimitByUserIdAndLimitTypeAndTransactionType(
+            Long userId,
+            LimitType limitType,
+            TransactionType transactionType);
+
+    /**
      * Получение списка лимитов пользователя
      * @param userId ID пользователя
      * @return список лимитов
