@@ -12,6 +12,7 @@ import com.card_management.limits_api.model.Limit;
 import com.card_management.limits_api.repository.LimitRepository;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.transaction_api.enumeration.TransactionType;
+import com.card_management.users_api.model.User;
 import com.card_management.users_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -86,14 +87,13 @@ public class LimitService {
         return balancesByLimit;
     }
 
-    public boolean canTransaction(Limit limit, Integer amount) {
+    public void canTransaction(Limit limit, Integer amount) {
         checkAndResetLimits(limit);
         boolean transactionOk = (limit.getCurrentExpensesAmount() + amount) <= limit.getLimitAmount();
         if (!transactionOk) {
             throw new ExceedingLimitException("Превышен " + limit.getLimitType().getDescription() +
                     " на " + limit.getTransactionType().getDescription());
         }
-        return true;
     }
 
     public void registerTransaction(Limit limit, Integer amount) {
@@ -120,5 +120,35 @@ public class LimitService {
                 limit.setDateLastTransaction(null);
             }
         }
+    }
+
+    public void setDefaultLimits(User user) {
+        var dailyTransfer = new Limit();
+        dailyTransfer.setUser(user);
+        dailyTransfer.setLimitType(LimitType.DAILY);
+        dailyTransfer.setTransactionType(TransactionType.TRANSFER);
+        dailyTransfer.setLimitAmount(10000);
+        limitRepository.save(dailyTransfer);
+
+        var monthlyTransfer = new Limit();
+        monthlyTransfer.setUser(user);
+        monthlyTransfer.setLimitType(LimitType.MONTHLY);
+        monthlyTransfer.setTransactionType(TransactionType.TRANSFER);
+        monthlyTransfer.setLimitAmount(150000);
+        limitRepository.save(monthlyTransfer);
+
+        var dailyWithdrawals = new Limit();
+        dailyWithdrawals.setUser(user);
+        dailyWithdrawals.setLimitType(LimitType.DAILY);
+        dailyWithdrawals.setTransactionType(TransactionType.WITHDRAWALS);
+        dailyWithdrawals.setLimitAmount(5000);
+        limitRepository.save(dailyWithdrawals);
+
+        var monthlyWithdrawals = new Limit();
+        monthlyWithdrawals.setUser(user);
+        monthlyWithdrawals.setLimitType(LimitType.MONTHLY);
+        monthlyWithdrawals.setTransactionType(TransactionType.WITHDRAWALS);
+        monthlyWithdrawals.setLimitAmount(50000);
+        limitRepository.save(monthlyWithdrawals);
     }
 }
