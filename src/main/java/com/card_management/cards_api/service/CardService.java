@@ -60,8 +60,8 @@ public class CardService {
         var card = cardMapper.map(cardDto);
         var salt = KeyGenerators.string().generateKey();
         var coder = new CardEncryptor(appConfig.getPassword(), salt);
-        var coderNumber = coder.encryptCardNumber(cardDto.getCardNumber());
-        card.setEncryptedCardNumber(coderNumber);
+        var encryptedNumber = coder.encryptCardNumber(cardDto.getCardNumber());
+        card.setEncryptedCardNumber(encryptedNumber);
         card.setSaltNumberCard(salt);
         cardRepository.save(card);
         return cardMapper.map(card);
@@ -83,25 +83,12 @@ public class CardService {
     }
 
     public Card findMatchByNumberCard(String numberCard, Long userId) {
-/*        Card cardSought = null; //todo убрать тут null
-        var listCards = cardRepository.findByOwnerId(userId);
-        for (Card card: listCards) {
-            if (decryptCardNumber(card).equals(numberCard)) {
-                cardSought = card;
-            }
-        }
-        if (cardSought == null) {
-            throw new ResourceNotFoundException("Карта с номером " + numberCard
-                    + " не принадлежит пользователю с ID " + userId);
-        }*/
         return cardRepository.findByOwnerId(userId)
                 .stream()
                 .filter(card -> decryptCardNumber(card).equals(numberCard))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Карта с номером " + numberCard
                 + " не принадлежит пользователю с ID " + userId));
-
-        //return cardSought;
     }
 
     private String decryptCardNumber(Card card) {
