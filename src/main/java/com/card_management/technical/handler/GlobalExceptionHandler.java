@@ -4,6 +4,7 @@ import com.card_management.cards_api.exception.BlockedCardException;
 import com.card_management.limits_api.exception.DuplicateLimitException;
 import com.card_management.limits_api.exception.ExceedingLimitException;
 import com.card_management.technical.exception.CustomValidationException;
+import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.transaction_api.exception.InsufficientFundsForTransactionException;
 import com.card_management.users_api.exception.DuplicateEmailException;
@@ -46,5 +47,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BlockedCardException.class)
     public ResponseEntity<String> handleBlockedCardException(BlockedCardException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FieldsValidationException.class)
+    public ResponseEntity<String> handleFieldsValidationException(FieldsValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

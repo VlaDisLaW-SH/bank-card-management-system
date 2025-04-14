@@ -1,5 +1,6 @@
 package com.card_management.controllers;
 
+import com.card_management.controllers.common.TransactionValidator;
 import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.transaction_api.dto.TransactionByCardDto;
 import com.card_management.transaction_api.dto.TransactionCreateDto;
@@ -20,9 +21,11 @@ public class TransactionsController {
 
     private final TransactionService transactionService;
 
+    private final TransactionValidator transactionValidator;
+
     @GetMapping(path = "")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<TransactionEnvelopDto> getLimits(
+    public ResponseEntity<TransactionEnvelopDto> getTransactions(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sort
@@ -47,6 +50,7 @@ public class TransactionsController {
         if (bindingResult.hasErrors()) {
             throw new CustomValidationException(bindingResult);
         }
+        transactionValidator.validateCreateTransaction(transactionData);
         var transaction = transactionService.create(transactionData);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

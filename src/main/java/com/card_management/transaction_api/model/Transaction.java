@@ -42,22 +42,22 @@ public class Transaction {
      */
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "user_uuid")
+    @JoinColumn(name = "user_id")
     private User user;
 
     /**
-     * Источник транзакции
+     * Карта, используемая в качестве источника транзакции
      */
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "source_uuid")
+    @JoinColumn(name = "source_id")
     private Card source;
 
     /**
      * Карта, используемая в качестве получателя средств или цели операции
      */
     @ManyToOne
-    @JoinColumn(name = "destination_uuid")
+    @JoinColumn(name = "destination_id")
     private Card destination;
 
     /**

@@ -11,8 +11,7 @@ import org.mapstruct.*;
         componentModel = MappingConstants.ComponentModel.SPRING,
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
-        uses = {UserMapper.class
-        }
+        uses = {UserMapper.class}
 )
 public abstract class TransactionMapper {
         @Mapping(target = "user", source = "userId")

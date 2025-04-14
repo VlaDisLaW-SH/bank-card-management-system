@@ -83,7 +83,7 @@ public class CardService {
     }
 
     public Card findMatchByNumberCard(String numberCard, Long userId) {
-        Card cardSought = null;
+/*        Card cardSought = null; //todo убрать тут null
         var listCards = cardRepository.findByOwnerId(userId);
         for (Card card: listCards) {
             if (decryptCardNumber(card).equals(numberCard)) {
@@ -93,8 +93,15 @@ public class CardService {
         if (cardSought == null) {
             throw new ResourceNotFoundException("Карта с номером " + numberCard
                     + " не принадлежит пользователю с ID " + userId);
-        }
-        return cardSought;
+        }*/
+        return cardRepository.findByOwnerId(userId)
+                .stream()
+                .filter(card -> decryptCardNumber(card).equals(numberCard))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Карта с номером " + numberCard
+                + " не принадлежит пользователю с ID " + userId));
+
+        //return cardSought;
     }
 
     private String decryptCardNumber(Card card) {

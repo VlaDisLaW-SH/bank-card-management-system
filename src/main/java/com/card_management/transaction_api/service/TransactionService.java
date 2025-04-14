@@ -1,7 +1,7 @@
 package com.card_management.transaction_api.service;
 
 import com.card_management.cards_api.model.Card;
-import com.card_management.cards_api.service.CardService;
+import com.card_management.controllers.common.TransactionValidator;
 import com.card_management.limits_api.enumeration.LimitType;
 import com.card_management.limits_api.repository.LimitRepository;
 import com.card_management.limits_api.service.LimitService;
@@ -33,11 +33,11 @@ public class TransactionService {
 
     private final UserRepository userRepository;
 
-    private final CardService cardService;
-
     private final LimitService limitService;
 
     private final LimitRepository limitRepository;
+
+    private final TransactionValidator transactionValidator;
 
     public TransactionEnvelopDto getTransactions(int page, int size, String sort) {
         var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
@@ -60,30 +60,21 @@ public class TransactionService {
 
     @Transactional
     public TransactionDto create(TransactionCreateDto transactionDto) {
-        var user = userRepository.findById(transactionDto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с ID " + transactionDto.getUserId()
-                        + " не найден"));
-        var sourceEntity = cardService.findMatchByNumberCard(transactionDto.getSourceNumber(), user.getId());
-        cardService.checkCardStatus(sourceEntity);
-        Card destinationEntity = null;
-        if (transactionDto.getDestinationNumber() != null) {
-            destinationEntity = cardService.findMatchByNumberCard(transactionDto.getDestinationNumber(), user.getId());
-            cardService.checkCardStatus(destinationEntity);
-        }
         processingLimits(transactionDto);
+        var sourceEntity = transactionValidator.getSourceEntity();
         checkBalancesCard(sourceEntity, transactionDto.getAmount());
         sourceEntity.setBalance(sourceEntity.getBalance() - transactionDto.getAmount());
-        if (destinationEntity != null) {
-            destinationEntity.setBalance(destinationEntity.getBalance() + transactionDto.getAmount());
-        }
+
         var transaction = transactionMapper.map(transactionDto);
         transaction.setSource(sourceEntity);
         sourceEntity.getOutgoingTransactions().add(transaction);
-        if (destinationEntity != null) {
+        if (transactionDto.getDestinationNumber() != null) {
+            var destinationEntity = transactionValidator.getDestinationEntity();
+            destinationEntity.setBalance(destinationEntity.getBalance() + transactionDto.getAmount());
             transaction.setDestination(destinationEntity);
             destinationEntity.getIncomingTransactions().add(transaction);
         }
-        user.getTransactions().add(transaction);
+        sourceEntity.getOwner().getTransactions().add(transaction);
         transactionRepository.save(transaction);
         return transactionMapper.map(transaction);
     }
