@@ -2,10 +2,7 @@ package com.card_management.controllers;
 
 import com.card_management.controllers.common.TransactionValidator;
 import com.card_management.technical.exception.CustomValidationException;
-import com.card_management.transaction_api.dto.TransactionByCardDto;
-import com.card_management.transaction_api.dto.TransactionCreateDto;
-import com.card_management.transaction_api.dto.TransactionDto;
-import com.card_management.transaction_api.dto.TransactionEnvelopDto;
+import com.card_management.transaction_api.dto.*;
 import com.card_management.transaction_api.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -85,5 +82,19 @@ public class TransactionsController {
     ) {
         TransactionEnvelopDto transactionEnvelopDto = transactionService.getCardTransactions(dto, page, size, sort);
         return ResponseEntity.ok(transactionEnvelopDto);
+    }
+
+    @PostMapping(path = "/filter")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<TransactionEnvelopDto> filterTransactions(
+            @Valid @RequestBody TransactionFilterDto filterDto,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new CustomValidationException(bindingResult);
+        }
+        transactionValidator.validateFilterTransaction(filterDto);
+        var transactions = transactionService.getFilteredTransactions(filterDto);
+        return ResponseEntity.ok(transactions);
     }
 }

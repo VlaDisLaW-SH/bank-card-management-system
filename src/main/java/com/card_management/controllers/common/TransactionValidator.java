@@ -4,6 +4,9 @@ import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.transaction_api.dto.TransactionCreateDto;
+import com.card_management.transaction_api.dto.TransactionFilterDto;
+import com.card_management.transaction_api.enumeration.SortDirection;
+import com.card_management.transaction_api.enumeration.TransactionSortFields;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import com.card_management.users_api.service.UserService;
 import lombok.Getter;
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 
 @Setter
 @Getter
@@ -44,6 +49,26 @@ public class TransactionValidator {
         if (createDto.getAmount() <= 0) {
             throw new FieldsValidationException("Для выполнения операции введите положительную сумму.");
         }
+    }
+
+    public void validateFilterTransaction(TransactionFilterDto filterDto) {
+        if (filterDto.getTransactionType() != null) {
+            validTransactionType(filterDto.getTransactionType());
+        }
+        if (filterDto.getSortBy() != null) {
+            boolean isValidSortBy = Arrays.stream(TransactionSortFields.values())
+                    .anyMatch(field -> field.getField().equals(filterDto.getSortBy()));
+            if (!isValidSortBy) {
+                throw new FieldsValidationException("Недопустимое поле сортировки: " + filterDto.getSortBy());
+            }
+        }
+        if (filterDto.getSortDirection() != null) {
+            if (!EnumUtils.isValidEnumIgnoreCase(SortDirection.class, filterDto.getSortDirection())) {
+                throw new FieldsValidationException("Некорректное направление сортировки: "
+                        + filterDto.getSortDirection());
+            }
+        }
+
     }
 
     private void validTransactionType(final String transactionType) {

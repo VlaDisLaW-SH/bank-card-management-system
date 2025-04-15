@@ -4,6 +4,7 @@ import com.card_management.transaction_api.model.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,8 @@ import java.util.UUID;
  * Интерфейс-репозиторий для транзакций
  */
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long>,
+        JpaSpecificationExecutor<Transaction> {
     /**
      * Поиск всех транзакций принадлежащих пользователю
      * @param userId ID пользователя

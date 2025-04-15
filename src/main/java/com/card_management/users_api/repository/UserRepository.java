@@ -24,4 +24,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return пользователь
      */
     User findByUuid(UUID uuid);
+
+    /**
+     * Поиск пользователя по UUID
+     * @param uuid UUID пользователя
+     * @return булево значение
+     */
+    boolean existsByUuid(UUID uuid);
 }

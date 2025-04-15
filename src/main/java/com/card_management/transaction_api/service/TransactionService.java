@@ -6,18 +6,18 @@ import com.card_management.limits_api.enumeration.LimitType;
 import com.card_management.limits_api.repository.LimitRepository;
 import com.card_management.limits_api.service.LimitService;
 import com.card_management.technical.exception.ResourceNotFoundException;
-import com.card_management.transaction_api.dto.TransactionByCardDto;
-import com.card_management.transaction_api.dto.TransactionCreateDto;
-import com.card_management.transaction_api.dto.TransactionDto;
-import com.card_management.transaction_api.dto.TransactionEnvelopDto;
+import com.card_management.transaction_api.dto.*;
+import com.card_management.transaction_api.enumeration.SortDirection;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import com.card_management.transaction_api.exception.InsufficientFundsForTransactionException;
 import com.card_management.transaction_api.mapper.TransactionMapper;
 import com.card_management.transaction_api.repository.TransactionRepository;
+import com.card_management.transaction_api.specification.TransactionSpecifications;
 import com.card_management.users_api.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -138,5 +138,44 @@ public class TransactionService {
         );
     }
 
-    //todo filter
+    public TransactionEnvelopDto getFilteredTransactions(TransactionFilterDto filterDto) {
+        if (filterDto.getUserUuid() != null) {
+            if (!userRepository.existsByUuid(UUID.fromString(filterDto.getUserUuid()))) {
+                throw new ResourceNotFoundException("Пользователь с UUID " + filterDto.getUserUuid()
+                        + " не зарегистрирован в системе");
+            }
+        }
+        if (filterDto.getPage() == null) {
+            filterDto.setPage(1);
+        }
+        if (filterDto.getSize() == null) {
+            filterDto.setSize(10);
+        }
+        if (filterDto.getSortBy() == null || filterDto.getSortBy().isEmpty()) {
+            filterDto.setSortBy("createdAt");
+        }
+        if (filterDto.getSortDirection() == null || filterDto.getSortDirection().isEmpty()) {
+            filterDto.setSortDirection("DESC");
+        }
+        var direction = SortDirection.valueOf(filterDto.getSortDirection().toUpperCase());
+        Sort sort = direction == SortDirection.DESC
+                ? Sort.by(filterDto.getSortBy()).descending()
+                : Sort.by(filterDto.getSortBy()).ascending();
+        Pageable pageable = PageRequest.of(
+                filterDto.getPage() - 1,
+                filterDto.getSize(),
+                sort
+        );
+        var transactionsPage = transactionRepository.findAll(
+                TransactionSpecifications.withFilter(filterDto), pageable
+        );
+        var transactionDtoList = transactionsPage.stream()
+                .map(transactionMapper::map)
+                .toList();
+        return new TransactionEnvelopDto(
+                transactionDtoList,
+                transactionsPage.getTotalElements(),
+                transactionsPage.getTotalPages()
+        );
+    }
 }
