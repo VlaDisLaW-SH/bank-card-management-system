@@ -6,6 +6,7 @@ import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.dto.CardEnvelopDto;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.cards_api.exception.BlockedCardException;
+import com.card_management.cards_api.exception.DuplicateCardException;
 import com.card_management.cards_api.mapper.CardMapper;
 import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.repository.CardRepository;
@@ -57,6 +58,7 @@ public class CardService {
         userRepository.findById(cardDto.getOwnerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с ID " + cardDto.getOwnerId()
                         + " не найден"));
+        checkDuplicateCard(cardDto.getCardNumber());
         var card = cardMapper.map(cardDto);
         var salt = KeyGenerators.string().generateKey();
         var coder = new CardEncryptor(appConfig.getPassword(), salt);
@@ -71,6 +73,17 @@ public class CardService {
         var card = cardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Карта с ID " + id + " не найдена"));
         cardRepository.delete(card);
+    }
+
+    private void checkDuplicateCard(String numberCard) {
+        var duplicateMaybe = cardRepository.findByMaskedNumber(numberCard);
+        if (duplicateMaybe != null) {
+            var fullNumberDuplicateCard = decryptCardNumber(duplicateMaybe);
+            if (fullNumberDuplicateCard.equals(numberCard)) {
+                throw new DuplicateCardException("Карта зарегистрирована в системе. Номер: "
+                        + duplicateMaybe.getMaskNumber());
+            }
+        }
     }
 
     public List<CardDto> getUserCards(Long userId) {

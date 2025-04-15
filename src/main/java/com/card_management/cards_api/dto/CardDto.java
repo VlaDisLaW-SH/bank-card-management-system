@@ -17,6 +17,11 @@ public class CardDto {
     private Long id;
 
     /**
+     * UUID карты
+     */
+    private UUID uuid;
+
+    /**
      * Замаскированный номер карты в формате 0000****0000
      */
     private String maskNumber;
