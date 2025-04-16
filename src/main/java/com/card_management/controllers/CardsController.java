@@ -3,7 +3,9 @@ package com.card_management.controllers;
 import com.card_management.cards_api.dto.CardCreateDto;
 import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.dto.CardEnvelopDto;
+import com.card_management.cards_api.dto.CardFilterDto;
 import com.card_management.cards_api.service.CardService;
+import com.card_management.controllers.common.CardValidator;
 import com.card_management.technical.exception.CustomValidationException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import java.util.List;
 public class CardsController {
 
     private final CardService cardService;
+
+    private final CardValidator cardValidator;
 
     @GetMapping(path = "")
     @ResponseStatus(HttpStatus.OK)
@@ -48,6 +52,7 @@ public class CardsController {
         if (bindingResult.hasErrors()) {
             throw new CustomValidationException(bindingResult);
         }
+        cardValidator.validateCreateCard(cardData);
         var card = cardService.create(cardData);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -65,5 +70,19 @@ public class CardsController {
     public ResponseEntity<List<CardDto>> getUserCards(@PathVariable Long userId) {
         List<CardDto> cardDtoList = cardService.getUserCards(userId);
         return ResponseEntity.ok(cardDtoList);
+    }
+
+    @PostMapping(path = "/filter")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<CardEnvelopDto> filterCards(
+            @Valid @RequestBody CardFilterDto filterDto,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new CustomValidationException(bindingResult);
+        }
+        cardValidator.validateFilterCard(filterDto);
+        var cards = cardService.getFilteredCards(filterDto);
+        return ResponseEntity.ok(cards);
     }
 }

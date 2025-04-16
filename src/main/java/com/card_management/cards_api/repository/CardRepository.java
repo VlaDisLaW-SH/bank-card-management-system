@@ -3,6 +3,7 @@ package com.card_management.cards_api.repository;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.cards_api.model.Card;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,7 +12,8 @@ import java.util.List;
  * Интерфейс-репозиторий для карт
  */
 @Repository
-public interface CardRepository extends JpaRepository<Card, Long> {
+public interface CardRepository extends JpaRepository<Card, Long>,
+        JpaSpecificationExecutor<Card> {
     /**
      * Поиск всех карт принадлежащих пользователю
      * @param userId ID пользователя

@@ -4,23 +4,28 @@ import com.card_management.application.configuration.AppConfig;
 import com.card_management.cards_api.dto.CardCreateDto;
 import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.dto.CardEnvelopDto;
+import com.card_management.cards_api.dto.CardFilterDto;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.cards_api.exception.BlockedCardException;
 import com.card_management.cards_api.exception.DuplicateCardException;
 import com.card_management.cards_api.mapper.CardMapper;
 import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.repository.CardRepository;
+import com.card_management.cards_api.specification.CardSpecifications;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.technical.util.CardEncryptor;
+import com.card_management.transaction_api.enumeration.SortDirection;
 import com.card_management.users_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +78,47 @@ public class CardService {
         var card = cardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Карта с ID " + id + " не найдена"));
         cardRepository.delete(card);
+    }
+
+    public CardEnvelopDto getFilteredCards(CardFilterDto cardFilterDto) {
+        if (cardFilterDto.getOwnerUuid() != null) {
+            if (!userRepository.existsByUuid(UUID.fromString(cardFilterDto.getOwnerUuid()))) {
+                throw new ResourceNotFoundException("Пользователь с UUID " + cardFilterDto.getOwnerUuid()
+                        + " не зарегистрирован в системе");
+            }
+        }
+        if (cardFilterDto.getPage() == null) {
+            cardFilterDto.setPage(1);
+        }
+        if (cardFilterDto.getSize() == null) {
+            cardFilterDto.setSize(5);
+        }
+        if (cardFilterDto.getSortBy() == null || cardFilterDto.getSortBy().isEmpty()) {
+            cardFilterDto.setSortBy("balance");
+        }
+        if (cardFilterDto.getSortDirection() == null || cardFilterDto.getSortDirection().isEmpty()) {
+            cardFilterDto.setSortDirection("DESC");
+        }
+        var direction = SortDirection.valueOf(cardFilterDto.getSortDirection().toUpperCase());
+        Sort sort = direction == SortDirection.DESC
+                ? Sort.by(cardFilterDto.getSortBy()).descending()
+                : Sort.by(cardFilterDto.getSortBy()).ascending();
+        Pageable pageable = PageRequest.of(
+                cardFilterDto.getPage() - 1,
+                cardFilterDto.getSize(),
+                sort
+        );
+        var cardPage = cardRepository.findAll(
+                CardSpecifications.withFilter(cardFilterDto), pageable
+        );
+        var cardDtoList = cardPage.stream()
+                .map(cardMapper::map)
+                .toList();
+        return new CardEnvelopDto(
+                cardDtoList,
+                cardPage.getTotalElements(),
+                cardPage.getTotalPages()
+        );
     }
 
     private void checkDuplicateCard(String numberCard) {
