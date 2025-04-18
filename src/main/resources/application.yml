@@ -19,3 +19,5 @@ spring:
 card:
   encryptor:
     password: ${CARD_ENCRYPTOR_PASSWORD}
+jwt:
+  secret: ${JWT_SECRET}
