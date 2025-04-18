@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Schema(enumAsRef = true)
 public enum UserAccessType {
-    ADMINISTRATOR("Администратор"),
+    ADMIN("Администратор"),
     USER("Пользователь");
 
     private final String description;

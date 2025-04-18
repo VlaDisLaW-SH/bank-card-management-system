@@ -1,5 +1,6 @@
 package com.card_management.technical.util;
 
+import com.card_management.users_api.model.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -35,10 +36,15 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("authorities", authorities)
+                .claim("userId", ((CustomUserDetails) userDetails).getId()) // Добавляем ID поль
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public Long extractUserId(String token) {
+        return parseToken(token).getBody().get("userId", Long.class);
     }
 
     public String extractUsername(String token) {
