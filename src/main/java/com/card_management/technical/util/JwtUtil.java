@@ -36,15 +36,11 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("authorities", authorities)
-                .claim("userId", ((CustomUserDetails) userDetails).getId()) // Добавляем ID поль
+                .claim("userId", ((CustomUserDetails) userDetails).getId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public Long extractUserId(String token) {
-        return parseToken(token).getBody().get("userId", Long.class);
     }
 
     public String extractUsername(String token) {

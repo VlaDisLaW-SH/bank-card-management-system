@@ -1,4 +1,4 @@
-package com.card_management.cards_api.service;
+package com.card_management.cards_api.scheduled;
 
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.cards_api.model.Card;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CardExpirationService {
+public class CardExpirationScheduler {
     private final CardRepository cardRepository;
 
     @Scheduled(cron = "0 0 4 * * ?")

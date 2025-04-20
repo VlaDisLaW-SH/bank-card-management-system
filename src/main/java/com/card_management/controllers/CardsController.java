@@ -7,13 +7,13 @@ import com.card_management.cards_api.dto.CardFilterDto;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.controllers.common.CardValidator;
 import com.card_management.technical.exception.CustomValidationException;
-import com.card_management.technical.util.CurrentUser;
 import com.card_management.users_api.model.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,7 +83,7 @@ public class CardsController {
     @GetMapping("/my")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<CardDto>> getMyCards(@CurrentUser CustomUserDetails userDetails) {
+    public ResponseEntity<List<CardDto>> getMyCards(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<CardDto> cardDtoList = cardService.getUserCards(userDetails.getId());
         return ResponseEntity.ok(cardDtoList);
     }
