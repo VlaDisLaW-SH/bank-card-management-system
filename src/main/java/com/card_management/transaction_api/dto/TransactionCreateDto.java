@@ -1,5 +1,7 @@
 package com.card_management.transaction_api.dto;
 
+import com.card_management.technical.validation.NullForNonAdmin;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,7 +16,8 @@ public class TransactionCreateDto {
     /**
      * ID инициатора транзакции
      */
-    @NotNull
+    @JsonIgnore
+    @NullForNonAdmin
     private Long userId;
 
     /**

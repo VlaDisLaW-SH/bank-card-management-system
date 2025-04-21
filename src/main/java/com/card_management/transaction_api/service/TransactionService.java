@@ -1,27 +1,30 @@
 package com.card_management.transaction_api.service;
 
 import com.card_management.cards_api.model.Card;
+import com.card_management.cards_api.service.CardService;
 import com.card_management.controllers.common.TransactionValidator;
 import com.card_management.limits_api.enumeration.LimitType;
 import com.card_management.limits_api.repository.LimitRepository;
 import com.card_management.limits_api.service.LimitService;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.transaction_api.dto.*;
-import com.card_management.transaction_api.enumeration.SortDirection;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import com.card_management.transaction_api.exception.InsufficientFundsForTransactionException;
 import com.card_management.transaction_api.mapper.TransactionMapper;
 import com.card_management.transaction_api.repository.TransactionRepository;
 import com.card_management.transaction_api.specification.TransactionSpecifications;
 import com.card_management.users_api.repository.UserRepository;
+import com.card_management.users_api.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.stream.Stream;
+
+import static com.card_management.technical.util.PaginationUtils.createPageable;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +36,15 @@ public class TransactionService {
 
     private final UserRepository userRepository;
 
+    private final UserService userService;
+
     private final LimitService limitService;
 
     private final LimitRepository limitRepository;
 
     private final TransactionValidator transactionValidator;
+
+    private final CardService cardService;
 
     public TransactionEnvelopDto getTransactions(int page, int size, String sort) {
         var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
@@ -120,20 +127,58 @@ public class TransactionService {
     }
 
     public TransactionEnvelopDto getCardTransactions(TransactionByCardDto dto, int page, int size, String sort) {
-        var userUuid = UUID.fromString(dto.getOwnerUuid());
-        var userMaybe = userRepository.findByUuid(userUuid);
-        if (userMaybe == null) {
-            throw new ResourceNotFoundException("Пользователь с UUID " + dto.getOwnerUuid() + " не найден");
-        }
+        var userMaybe = userService.findById(dto.getUserId());
         var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
         var transactionPage = transactionRepository
-                .findByUserUuidAndCardLastFourDigits(userUuid, dto.getCardLastFourDigits(), pageRequest);
-        var transactionDto = transactionPage.stream()
+                .findByUserId(userMaybe.getId(), pageRequest);
+        var transactionsBySource = transactionPage.stream()
+                .filter(card -> cardService.getCardLastFourDigits(card.getSource()).equals(dto.getCardLastFourDigits()))
                 .map(transactionMapper::map)
                 .toList();
+        var transactionsByDestination = transactionPage.stream()
+                .filter(card -> card.getDestination() != null
+                        && cardService.getCardLastFourDigits(card.getDestination()).equals(dto.getCardLastFourDigits()))
+                .map(transactionMapper::map)
+                .toList();
+        var transactionsList = Stream.concat(
+                transactionsBySource.stream(),
+                transactionsByDestination.stream()
+                )
+                .toList();
         return new TransactionEnvelopDto(
-                transactionDto,
-                transactionPage.getTotalElements(),
+                transactionsList,
+                transactionsList.size(), //check cast
+                transactionPage.getTotalPages()
+        );
+    }
+
+    public TransactionEnvelopDto getUserTransactionsByCard(
+            Long userId,
+            String cardLastFourDigits,
+            int page,
+            int size,
+            String sort
+    ) {
+        var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
+        var transactionPage = transactionRepository
+                .findByUserId(userId, pageRequest);
+        var transactionsBySource = transactionPage.stream()
+                .filter(card -> cardService.getCardLastFourDigits(card.getSource()).equals(cardLastFourDigits))
+                .map(transactionMapper::map)
+                .toList();
+        var transactionsByDestination = transactionPage.stream()
+                .filter(card -> card.getDestination() != null
+                        && cardService.getCardLastFourDigits(card.getDestination()).equals(cardLastFourDigits))
+                .map(transactionMapper::map)
+                .toList();
+        var transactionsList = Stream.concat(
+                        transactionsBySource.stream(),
+                        transactionsByDestination.stream()
+                )
+                .toList();
+        return new TransactionEnvelopDto(
+                transactionsList,
+                transactionsList.size(), //check cast
                 transactionPage.getTotalPages()
         );
     }
@@ -145,27 +190,39 @@ public class TransactionService {
                         + " не зарегистрирован в системе");
             }
         }
-        if (filterDto.getPage() == null) {
-            filterDto.setPage(1);
-        }
-        if (filterDto.getSize() == null) {
-            filterDto.setSize(10);
-        }
-        if (filterDto.getSortBy() == null || filterDto.getSortBy().isEmpty()) {
-            filterDto.setSortBy("createdAt");
-        }
-        if (filterDto.getSortDirection() == null || filterDto.getSortDirection().isEmpty()) {
-            filterDto.setSortDirection("DESC");
-        }
-        var direction = SortDirection.valueOf(filterDto.getSortDirection().toUpperCase());
-        Sort sort = direction == SortDirection.DESC
-                ? Sort.by(filterDto.getSortBy()).descending()
-                : Sort.by(filterDto.getSortBy()).ascending();
-        Pageable pageable = PageRequest.of(
-                filterDto.getPage() - 1,
-                filterDto.getSize(),
-                sort
+        var pageable = createPageable(
+                filterDto,
+                TransactionFilterDto::getSortBy,
+                TransactionFilterDto::getSortDirection,
+                TransactionFilterDto::getPage,
+                TransactionFilterDto::getSize,
+                "createdAt",
+                "DESC"
         );
+        var transactionsPage = transactionRepository.findAll(
+                TransactionSpecifications.withFilter(filterDto), pageable
+        );
+        var transactionDtoList = transactionsPage.stream()
+                .map(transactionMapper::map)
+                .toList();
+        return new TransactionEnvelopDto(
+                transactionDtoList,
+                transactionsPage.getTotalElements(),
+                transactionsPage.getTotalPages()
+        );
+    }
+
+    public TransactionEnvelopDto filterUserTransactions(Long userId, TransactionFilterDto filterDto) {
+        var pageable = createPageable(
+                filterDto,
+                TransactionFilterDto::getSortBy,
+                TransactionFilterDto::getSortDirection,
+                TransactionFilterDto::getPage,
+                TransactionFilterDto::getSize,
+                "createdAt",
+                "DESC"
+        );
+        filterDto.setUserId(userId);
         var transactionsPage = transactionRepository.findAll(
                 TransactionSpecifications.withFilter(filterDto), pageable
         );

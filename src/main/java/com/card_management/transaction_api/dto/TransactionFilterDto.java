@@ -1,5 +1,6 @@
 package com.card_management.transaction_api.dto;
 
+import com.card_management.technical.validation.NullForNonAdmin;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -37,12 +38,19 @@ public class TransactionFilterDto {
     private String sortDirection;
 
     /**
+     * ID инициатора транзакции
+     */
+    @NullForNonAdmin
+    private Long userId;
+
+    /**
      * UUID инициатора транзакции
      */
     @Pattern(
             regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
             message = "Неверный формат UUID"
     )
+    @NullForNonAdmin
     private String userUuid;
 
     /**

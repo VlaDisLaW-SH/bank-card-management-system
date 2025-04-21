@@ -52,6 +52,9 @@ public class TransactionValidator {
     }
 
     public void validateFilterTransaction(TransactionFilterDto filterDto) {
+        if (filterDto.getUserId() != null) {
+            userService.findById(filterDto.getUserId());
+        }
         if (filterDto.getTransactionType() != null) {
             validTransactionType(filterDto.getTransactionType());
         }

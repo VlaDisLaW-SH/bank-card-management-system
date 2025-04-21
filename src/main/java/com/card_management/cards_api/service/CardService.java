@@ -161,4 +161,12 @@ public class CardService {
                     + " Номер карты: " + card.getMaskNumber());
         }
     }
+
+    public String getCardLastFourDigits(Card card) {
+        var maskedNumberCard = card.getMaskNumber();
+        if (maskedNumberCard == null) {
+            throw new RuntimeException("Отсутствует номер карты");
+        }
+        return maskedNumberCard.substring(maskedNumberCard.length() - 4);
+    }
 }

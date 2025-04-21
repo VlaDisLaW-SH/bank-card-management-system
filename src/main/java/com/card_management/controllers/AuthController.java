@@ -1,5 +1,6 @@
 package com.card_management.controllers;
 
+import com.card_management.limits_api.service.LimitService;
 import com.card_management.users_api.dto.AuthRequest;
 import com.card_management.technical.util.JwtUtil;
 import com.card_management.users_api.dto.UserCreateDto;
@@ -26,12 +27,14 @@ public class AuthController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final LimitService limitService;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserCreateDto userDto) {
         var user = userMapper.map(userDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        limitService.setDefaultLimits(user);
         return ResponseEntity.ok("User registered");
     }
 

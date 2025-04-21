@@ -16,6 +16,13 @@ public class TransactionSpecifications {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if (filter.getUserId() != null) {
+                predicates.add(criteriaBuilder.equal(
+                        root.get("user").get("id"),
+                        filter.getUserId()
+                ));
+            }
+
             if (filter.getUserUuid() != null) {
                 predicates.add(criteriaBuilder.equal(
                         root.get("user").get("uuid"),
