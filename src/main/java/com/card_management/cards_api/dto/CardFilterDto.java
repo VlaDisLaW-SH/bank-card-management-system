@@ -35,15 +35,6 @@ public class CardFilterDto {
     private String sortDirection;
 
     /**
-     * UUID владельца карты
-     */
-    @Pattern(
-            regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-            message = "Неверный формат UUID"
-    )
-    private String ownerUuid;
-
-    /**
      * Последние 4 цифры номера карты
      */
     @Size(min = 4, max = 4, message = "Введите 4 последние цифры номера карты")

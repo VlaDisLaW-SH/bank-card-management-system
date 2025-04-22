@@ -1,14 +1,12 @@
 package com.card_management.controllers;
 
-import com.card_management.cards_api.dto.CardCreateDto;
-import com.card_management.cards_api.dto.CardDto;
-import com.card_management.cards_api.dto.CardEnvelopDto;
-import com.card_management.cards_api.dto.CardFilterDto;
+import com.card_management.cards_api.dto.*;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.controllers.common.CardValidator;
 import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.users_api.model.CustomUserDetails;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,9 +86,38 @@ public class CardsController {
         return ResponseEntity.ok(cardDtoList);
     }
 
+    @GetMapping("/block/{cardLastFourDigits}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('USER')")
+    public void setBlockedStatusForCard(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable
+            @Pattern(regexp = "\\d{4}", message = "Введите последние четыре цифры карты.")
+            String cardLastFourDigits
+    ) {
+        cardService.setBlockedStatusForCard(userDetails.getId(), cardLastFourDigits);
+    }
+
     @PostMapping(path = "/filter")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CardEnvelopDto> filterCards(
+            @Valid @RequestBody CardAdminFilterDto filterDto,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new CustomValidationException(bindingResult);
+        }
+        cardValidator.validateFilterCard(filterDto.getCardFilterDto());
+        var cards = cardService.filterCardsForAdmin(filterDto);
+        return ResponseEntity.ok(cards);
+    }
+
+    @PostMapping(path = "/my/filter")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<CardEnvelopDto> filterCards(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CardFilterDto filterDto,
             BindingResult bindingResult
     ) {
@@ -98,7 +125,7 @@ public class CardsController {
             throw new CustomValidationException(bindingResult);
         }
         cardValidator.validateFilterCard(filterDto);
-        var cards = cardService.getFilteredCards(filterDto);
+        var cards = cardService.filterCards(filterDto, userDetails.getId());
         return ResponseEntity.ok(cards);
     }
 }

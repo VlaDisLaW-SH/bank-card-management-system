@@ -12,14 +12,14 @@ import java.util.List;
 
 public class CardSpecifications {
 
-    public static Specification<Card> withFilter(CardFilterDto filter) {
+    public static Specification<Card> withFilter(CardFilterDto filter, Long ownerId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (filter.getOwnerUuid() != null) {
+            if (ownerId != null) {
                 predicates.add(criteriaBuilder.equal(
-                        root.get("owner").get("uuid"),
-                        filter.getOwnerUuid()
+                        root.get("owner").get("id"),
+                        ownerId
                 ));
             }
 

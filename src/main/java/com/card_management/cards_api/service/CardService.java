@@ -1,10 +1,7 @@
 package com.card_management.cards_api.service;
 
 import com.card_management.application.configuration.AppConfig;
-import com.card_management.cards_api.dto.CardCreateDto;
-import com.card_management.cards_api.dto.CardDto;
-import com.card_management.cards_api.dto.CardEnvelopDto;
-import com.card_management.cards_api.dto.CardFilterDto;
+import com.card_management.cards_api.dto.*;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.cards_api.exception.BlockedCardException;
 import com.card_management.cards_api.exception.DuplicateCardException;
@@ -14,18 +11,18 @@ import com.card_management.cards_api.repository.CardRepository;
 import com.card_management.cards_api.specification.CardSpecifications;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.technical.util.CardEncryptor;
-import com.card_management.transaction_api.enumeration.SortDirection;
 import com.card_management.users_api.repository.UserRepository;
+import com.card_management.users_api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
+
+import static com.card_management.technical.util.PaginationUtils.createPageable;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +34,8 @@ public class CardService {
     private final CardMapper cardMapper;
 
     private final UserRepository userRepository;
+
+    private final UserService userService;
 
     private final AppConfig appConfig;
 
@@ -80,36 +79,28 @@ public class CardService {
         cardRepository.delete(card);
     }
 
-    public CardEnvelopDto getFilteredCards(CardFilterDto cardFilterDto) {
-        if (cardFilterDto.getOwnerUuid() != null) {
-            if (!userRepository.existsByUuid(UUID.fromString(cardFilterDto.getOwnerUuid()))) {
-                throw new ResourceNotFoundException("Пользователь с UUID " + cardFilterDto.getOwnerUuid()
-                        + " не зарегистрирован в системе");
-            }
+    public CardEnvelopDto filterCardsForAdmin(CardAdminFilterDto adminFilterDto) {
+        Long ownerId = null;
+        if (adminFilterDto.getOwnerId() != null) {
+            var user = userService.findById(adminFilterDto.getOwnerId());
+            ownerId = user.getId();
         }
-        if (cardFilterDto.getPage() == null) {
-            cardFilterDto.setPage(1);
-        }
-        if (cardFilterDto.getSize() == null) {
-            cardFilterDto.setSize(5);
-        }
-        if (cardFilterDto.getSortBy() == null || cardFilterDto.getSortBy().isEmpty()) {
-            cardFilterDto.setSortBy("balance");
-        }
-        if (cardFilterDto.getSortDirection() == null || cardFilterDto.getSortDirection().isEmpty()) {
-            cardFilterDto.setSortDirection("DESC");
-        }
-        var direction = SortDirection.valueOf(cardFilterDto.getSortDirection().toUpperCase());
-        Sort sort = direction == SortDirection.DESC
-                ? Sort.by(cardFilterDto.getSortBy()).descending()
-                : Sort.by(cardFilterDto.getSortBy()).ascending();
-        Pageable pageable = PageRequest.of(
-                cardFilterDto.getPage() - 1,
-                cardFilterDto.getSize(),
-                sort
+        var filterDto = adminFilterDto.getCardFilterDto();
+        return filterCards(filterDto, ownerId);
+    }
+
+    public CardEnvelopDto filterCards(CardFilterDto filterDto, Long ownerId) {
+        var pageable = createPageable(
+                filterDto,
+                CardFilterDto::getSortBy,
+                CardFilterDto::getSortDirection,
+                CardFilterDto::getPage,
+                CardFilterDto::getSize,
+                "balance",
+                "DESC"
         );
         var cardPage = cardRepository.findAll(
-                CardSpecifications.withFilter(cardFilterDto), pageable
+                CardSpecifications.withFilter(filterDto, ownerId), pageable
         );
         var cardDtoList = cardPage.stream()
                 .map(cardMapper::map)
@@ -139,6 +130,17 @@ public class CardService {
         return listCards.stream()
                 .map(cardMapper::map)
                 .toList();
+    }
+
+    public void setBlockedStatusForCard(Long userId, String cardLastFourDigits) {
+        var userCard = cardRepository.findByOwnerId(userId)
+                .stream()
+                .filter(card -> getCardLastFourDigits(card).equals(cardLastFourDigits))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Карта с последними четырьмя цифрами "
+                        + cardLastFourDigits + " не найдена."));
+        userCard.setStatus(CardStatus.BLOCKED);
+        cardRepository.save(userCard);
     }
 
     public Card findMatchByNumberCard(String numberCard, Long userId) {
