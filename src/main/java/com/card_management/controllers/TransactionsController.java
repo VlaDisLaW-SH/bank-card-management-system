@@ -131,13 +131,13 @@ public class TransactionsController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TransactionEnvelopDto> filterTransactions(
-            @Valid @RequestBody TransactionFilterDto filterDto,
+            @Valid @RequestBody TransactionAdminFilterDto filterDto,
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
             throw new CustomValidationException(bindingResult);
         }
-        transactionValidator.validateFilterTransaction(filterDto);
+        transactionValidator.validateFilterTransaction(filterDto.getTransactionFilterDto());
         var transactions = transactionService.getFilteredTransactions(filterDto);
         return ResponseEntity.ok(transactions);
     }

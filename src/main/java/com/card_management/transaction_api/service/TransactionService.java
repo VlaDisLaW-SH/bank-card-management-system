@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static com.card_management.technical.util.PaginationUtils.createPageable;
@@ -183,13 +182,13 @@ public class TransactionService {
         );
     }
 
-    public TransactionEnvelopDto getFilteredTransactions(TransactionFilterDto filterDto) {
-        if (filterDto.getUserUuid() != null) {
-            if (!userRepository.existsByUuid(UUID.fromString(filterDto.getUserUuid()))) {
-                throw new ResourceNotFoundException("Пользователь с UUID " + filterDto.getUserUuid()
-                        + " не зарегистрирован в системе");
-            }
+    public TransactionEnvelopDto getFilteredTransactions(TransactionAdminFilterDto adminFilterDtoDto) {
+        Long userId = null;
+        if (adminFilterDtoDto.getUserId() != null) {
+            var user = userService.findById(adminFilterDtoDto.getUserId());
+            userId = user.getId();
         }
+        var filterDto = adminFilterDtoDto.getTransactionFilterDto();
         var pageable = createPageable(
                 filterDto,
                 TransactionFilterDto::getSortBy,
@@ -200,7 +199,7 @@ public class TransactionService {
                 "DESC"
         );
         var transactionsPage = transactionRepository.findAll(
-                TransactionSpecifications.withFilter(filterDto), pageable
+                TransactionSpecifications.withFilter(filterDto, userId), pageable
         );
         var transactionDtoList = transactionsPage.stream()
                 .map(transactionMapper::map)
@@ -222,9 +221,8 @@ public class TransactionService {
                 "createdAt",
                 "DESC"
         );
-        filterDto.setUserId(userId);
         var transactionsPage = transactionRepository.findAll(
-                TransactionSpecifications.withFilter(filterDto), pageable
+                TransactionSpecifications.withFilter(filterDto, userId), pageable
         );
         var transactionDtoList = transactionsPage.stream()
                 .map(transactionMapper::map)

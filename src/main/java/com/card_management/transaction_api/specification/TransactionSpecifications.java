@@ -12,21 +12,14 @@ import java.util.List;
 
 public class TransactionSpecifications {
 
-    public static Specification<Transaction> withFilter(TransactionFilterDto filter) {
+    public static Specification<Transaction> withFilter(TransactionFilterDto filter, Long userId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (filter.getUserId() != null) {
+            if (userId != null) {
                 predicates.add(criteriaBuilder.equal(
                         root.get("user").get("id"),
-                        filter.getUserId()
-                ));
-            }
-
-            if (filter.getUserUuid() != null) {
-                predicates.add(criteriaBuilder.equal(
-                        root.get("user").get("uuid"),
-                        filter.getUserUuid()
+                        userId
                 ));
             }
 
