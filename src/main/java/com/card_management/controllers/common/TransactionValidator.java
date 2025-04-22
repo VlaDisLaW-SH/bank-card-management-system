@@ -28,7 +28,7 @@ public class TransactionValidator {
     private final UserService userService;
     private final CardService cardService;
 
-    public void validateCreateTransaction(final TransactionCreateDto createDto) {
+    public void validateCreateTransaction(final TransactionCreateDto createDto, final Long userId) {
         if (createDto.getDestinationNumber() == null
                 && createDto.getTransactionType().equals(TransactionType.TRANSFER.toString())) {
             throw new FieldsValidationException("Для перевода средств введите номер карты получателя.");
@@ -39,7 +39,7 @@ public class TransactionValidator {
         }
         validTransactionType(createDto.getTransactionType());
 
-        var user = userService.findById(createDto.getUserId());
+        var user = userService.findById(userId);
         this.sourceEntity = cardService.findMatchByNumberCard(createDto.getSourceNumber(), user.getId());
         cardService.checkCardStatus(sourceEntity);
         if (createDto.getDestinationNumber() != null) {

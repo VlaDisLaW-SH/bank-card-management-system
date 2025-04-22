@@ -65,13 +65,13 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionDto create(TransactionCreateDto transactionDto) {
-        processingLimits(transactionDto);
+    public TransactionDto create(TransactionCreateDto transactionDto, Long userId) {
+        processingLimits(transactionDto, userId);
         var sourceEntity = transactionValidator.getSourceEntity();
         checkBalancesCard(sourceEntity, transactionDto.getAmount());
         sourceEntity.setBalance(sourceEntity.getBalance() - transactionDto.getAmount());
 
-        var transaction = transactionMapper.map(transactionDto);
+        var transaction = transactionMapper.map(transactionDto, userId);
         transaction.setSource(sourceEntity);
         sourceEntity.getOutgoingTransactions().add(transaction);
         if (transactionDto.getDestinationNumber() != null) {
@@ -91,11 +91,11 @@ public class TransactionService {
         transactionRepository.delete(transaction);
     }
 
-    private void processingLimits(TransactionCreateDto transactionDto) {
+    private void processingLimits(TransactionCreateDto transactionDto, Long userId) {
         var transactionType = TransactionType.valueOf(transactionDto.getTransactionType());
-        var limitDaly = limitRepository.getLimitByUserIdAndLimitTypeAndTransactionType(transactionDto.getUserId(),
+        var limitDaly = limitRepository.getLimitByUserIdAndLimitTypeAndTransactionType(userId,
                 LimitType.DAILY, transactionType);
-        var limitMonthly = limitRepository.getLimitByUserIdAndLimitTypeAndTransactionType(transactionDto.getUserId(),
+        var limitMonthly = limitRepository.getLimitByUserIdAndLimitTypeAndTransactionType(userId,
                 LimitType.MONTHLY, transactionType);
 
         limitService.canTransaction(limitDaly, transactionDto.getAmount());

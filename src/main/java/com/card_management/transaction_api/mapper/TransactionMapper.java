@@ -4,7 +4,9 @@ import com.card_management.transaction_api.dto.TransactionCreateDto;
 import com.card_management.transaction_api.dto.TransactionDto;
 import com.card_management.transaction_api.model.Transaction;
 import com.card_management.users_api.mapper.UserMapper;
+import com.card_management.users_api.repository.UserRepository;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -14,8 +16,15 @@ import org.mapstruct.*;
         uses = {UserMapper.class}
 )
 public abstract class TransactionMapper {
-        @Mapping(target = "user", source = "userId")
-        public abstract Transaction map(TransactionCreateDto dto);
+
+        @Autowired
+        protected UserRepository userRepository;
+
+        @Mapping(
+                target = "user",
+                expression = "java(userRepository.findById(userId).orElseThrow())"
+        )
+        public abstract Transaction map(TransactionCreateDto dto, @Context Long userId);
 
         @Mapping(target = "userUuid", source = "user.uuid")
         @Mapping(target = "maskedSource", source = "source.maskNumber")

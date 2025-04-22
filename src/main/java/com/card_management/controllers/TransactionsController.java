@@ -69,9 +69,8 @@ public class TransactionsController {
         if (bindingResult.hasErrors()) {
             throw new CustomValidationException(bindingResult);
         }
-        transactionData.setUserId(userDetails.getId());
-        transactionValidator.validateCreateTransaction(transactionData);
-        var transaction = transactionService.create(transactionData);
+        transactionValidator.validateCreateTransaction(transactionData, userDetails.getId());
+        var transaction = transactionService.create(transactionData, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(transaction);
