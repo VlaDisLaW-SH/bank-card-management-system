@@ -79,14 +79,23 @@ public class CardService {
         cardRepository.delete(card);
     }
 
+    public void setCardStatus(Long userId, String cardLastFourDigits, String status) {
+        var userCard = cardRepository.findByOwnerId(userId)
+                .stream()
+                .filter(card -> getCardLastFourDigits(card).equals(cardLastFourDigits))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Карта с последними четырьмя цифрами "
+                        + cardLastFourDigits + " не найдена."));
+        userCard.setStatus(CardStatus.valueOf(status));
+        cardRepository.save(userCard);
+    }
+
     public CardEnvelopDto filterCardsForAdmin(CardAdminFilterDto adminFilterDto) {
-        Long ownerId = null;
-        if (adminFilterDto.getOwnerId() != null) {
-            var user = userService.findById(adminFilterDto.getOwnerId());
-            ownerId = user.getId();
+        if (adminFilterDto.getOwnerId() == null) {
+            return filterCards(adminFilterDto.getCardFilterDto(), null);
         }
-        var filterDto = adminFilterDto.getCardFilterDto();
-        return filterCards(filterDto, ownerId);
+        var user = userService.findById(adminFilterDto.getOwnerId());
+        return filterCards(adminFilterDto.getCardFilterDto(), user.getId());
     }
 
     public CardEnvelopDto filterCards(CardFilterDto filterDto, Long ownerId) {
@@ -133,14 +142,7 @@ public class CardService {
     }
 
     public void setBlockedStatusForCard(Long userId, String cardLastFourDigits) {
-        var userCard = cardRepository.findByOwnerId(userId)
-                .stream()
-                .filter(card -> getCardLastFourDigits(card).equals(cardLastFourDigits))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Карта с последними четырьмя цифрами "
-                        + cardLastFourDigits + " не найдена."));
-        userCard.setStatus(CardStatus.BLOCKED);
-        cardRepository.save(userCard);
+        setCardStatus(userId, cardLastFourDigits, "BLOCKED");
     }
 
     public Card findMatchByNumberCard(String numberCard, Long userId) {

@@ -86,7 +86,7 @@ public class CardsController {
         return ResponseEntity.ok(cardDtoList);
     }
 
-    @GetMapping("/block/{cardLastFourDigits}")
+    @PostMapping("/block/{cardLastFourDigits}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('USER')")
     public void setBlockedStatusForCard(
@@ -96,6 +96,24 @@ public class CardsController {
             String cardLastFourDigits
     ) {
         cardService.setBlockedStatusForCard(userDetails.getId(), cardLastFourDigits);
+    }
+
+    @PostMapping(path = "/setStatus")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void setCardStatus(
+            @Valid @RequestBody CardChangeStatusDto dataDto,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new CustomValidationException(bindingResult);
+        }
+        cardValidator.validateSetCardStatus(dataDto);
+        cardService.setCardStatus(
+                dataDto.getOwnerId(),
+                dataDto.getLastFourDigitsCardNumber(),
+                dataDto.getStatus()
+        );
     }
 
     @PostMapping(path = "/filter")
