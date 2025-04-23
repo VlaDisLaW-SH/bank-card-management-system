@@ -125,29 +125,19 @@ public class TransactionService {
         );
     }
 
-    public TransactionEnvelopDto getCardTransactions(TransactionByCardDto dto, int page, int size, String sort) {
-        var userMaybe = userService.findById(dto.getUserId());
-        var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
-        var transactionPage = transactionRepository
-                .findByUserId(userMaybe.getId(), pageRequest);
-        var transactionsBySource = transactionPage.stream()
-                .filter(card -> cardService.getCardLastFourDigits(card.getSource()).equals(dto.getCardLastFourDigits()))
-                .map(transactionMapper::map)
-                .toList();
-        var transactionsByDestination = transactionPage.stream()
-                .filter(card -> card.getDestination() != null
-                        && cardService.getCardLastFourDigits(card.getDestination()).equals(dto.getCardLastFourDigits()))
-                .map(transactionMapper::map)
-                .toList();
-        var transactionsList = Stream.concat(
-                transactionsBySource.stream(),
-                transactionsByDestination.stream()
-                )
-                .toList();
-        return new TransactionEnvelopDto(
-                transactionsList,
-                transactionsList.size(), //check cast
-                transactionPage.getTotalPages()
+    public TransactionEnvelopDto getCardTransactionsForAdmin(
+            TransactionByCardDto transactionByCardDto,
+            int page,
+            int size,
+            String sort
+    ) {
+        var userMaybe = userService.findById(transactionByCardDto.getUserId());
+        return getUserTransactionsByCard(
+                userMaybe.getId(),
+                transactionByCardDto.getCardLastFourDigits(),
+                page,
+                size,
+                sort
         );
     }
 
@@ -177,7 +167,7 @@ public class TransactionService {
                 .toList();
         return new TransactionEnvelopDto(
                 transactionsList,
-                transactionsList.size(), //check cast
+                transactionsList.size(),
                 transactionPage.getTotalPages()
         );
     }

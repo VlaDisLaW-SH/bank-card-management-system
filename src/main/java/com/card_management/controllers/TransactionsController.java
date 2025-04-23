@@ -100,12 +100,17 @@ public class TransactionsController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TransactionEnvelopDto> getCardTransactions(
-            @Valid @RequestBody TransactionByCardDto dto,
+            @Valid @RequestBody TransactionByCardDto transactionByCardDto,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sort
     ) {
-        TransactionEnvelopDto transactionEnvelopDto = transactionService.getCardTransactions(dto, page, size, sort);
+        TransactionEnvelopDto transactionEnvelopDto = transactionService.getCardTransactionsForAdmin(
+                transactionByCardDto,
+                page,
+                size,
+                sort
+        );
         return ResponseEntity.ok(transactionEnvelopDto);
     }
 
