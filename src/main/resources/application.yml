@@ -1,23 +1,31 @@
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
-    h2:
-      console:
-        enabled: true
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-  output:
-    ansi:
-      enabled: always
 card:
   encryptor:
     password: ${CARD_ENCRYPTOR_PASSWORD}
 jwt:
   secret: ${JWT_SECRET}
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_bank?sslmode=disable
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      ssl: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: bank_schema
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: postgresql
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
