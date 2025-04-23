@@ -137,7 +137,7 @@ public class TransactionsController {
             throw new CustomValidationException(bindingResult);
         }
         transactionValidator.validateFilterTransaction(filterDto.getTransactionFilterDto());
-        var transactions = transactionService.getFilteredTransactions(filterDto);
+        var transactions = transactionService.filterTransactionsForAdmin(filterDto);
         return ResponseEntity.ok(transactions);
     }
 
@@ -153,7 +153,7 @@ public class TransactionsController {
             throw new CustomValidationException(bindingResult);
         }
         transactionValidator.validateFilterTransaction(filterDto);
-        var transactions = transactionService.filterUserTransactions(userDetails.getId(), filterDto);
+        var transactions = transactionService.filterTransactions(filterDto, userDetails.getId());
         return ResponseEntity.ok(transactions);
     }
 }

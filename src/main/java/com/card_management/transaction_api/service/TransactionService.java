@@ -182,36 +182,15 @@ public class TransactionService {
         );
     }
 
-    public TransactionEnvelopDto getFilteredTransactions(TransactionAdminFilterDto adminFilterDtoDto) {
-        Long userId = null;
-        if (adminFilterDtoDto.getUserId() != null) {
-            var user = userService.findById(adminFilterDtoDto.getUserId());
-            userId = user.getId();
+    public TransactionEnvelopDto filterTransactionsForAdmin(TransactionAdminFilterDto adminFilterDto) {
+        if (adminFilterDto.getUserId() == null) {
+            return filterTransactions(adminFilterDto.getTransactionFilterDto(), null);
         }
-        var filterDto = adminFilterDtoDto.getTransactionFilterDto();
-        var pageable = createPageable(
-                filterDto,
-                TransactionFilterDto::getSortBy,
-                TransactionFilterDto::getSortDirection,
-                TransactionFilterDto::getPage,
-                TransactionFilterDto::getSize,
-                "createdAt",
-                "DESC"
-        );
-        var transactionsPage = transactionRepository.findAll(
-                TransactionSpecifications.withFilter(filterDto, userId), pageable
-        );
-        var transactionDtoList = transactionsPage.stream()
-                .map(transactionMapper::map)
-                .toList();
-        return new TransactionEnvelopDto(
-                transactionDtoList,
-                transactionsPage.getTotalElements(),
-                transactionsPage.getTotalPages()
-        );
+        var user = userService.findById(adminFilterDto.getUserId());
+        return filterTransactions(adminFilterDto.getTransactionFilterDto(), user.getId());
     }
 
-    public TransactionEnvelopDto filterUserTransactions(Long userId, TransactionFilterDto filterDto) {
+    public TransactionEnvelopDto filterTransactions(TransactionFilterDto filterDto, Long userId) {
         var pageable = createPageable(
                 filterDto,
                 TransactionFilterDto::getSortBy,
