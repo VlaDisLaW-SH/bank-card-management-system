@@ -1,5 +1,6 @@
 package com.card_management.controllers;
 
+import com.card_management.controllers.common.LimitValidator;
 import com.card_management.limits_api.dto.LimitCreateDto;
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.dto.LimitEnvelopDto;
@@ -23,6 +24,8 @@ import java.util.List;
 public class LimitsController {
 
     private final LimitService limitService;
+
+    private final LimitValidator limitValidator;
 
     @GetMapping(path = "")
     @ResponseStatus(HttpStatus.OK)
@@ -54,6 +57,7 @@ public class LimitsController {
         if (bindingResult.hasErrors()) {
             throw new CustomValidationException(bindingResult);
         }
+        limitValidator.validateCreateLimit(limitData);
         var limit = limitService.create(limitData);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -70,6 +74,7 @@ public class LimitsController {
         if (bindingResult.hasErrors()) {
             throw new CustomValidationException(bindingResult);
         }
+        limitValidator.validateCreateLimit(limitData);
         var message = limitService.setLimit(limitData);
         return ResponseEntity
                 .status(HttpStatus.OK)

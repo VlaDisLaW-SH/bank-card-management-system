@@ -2,6 +2,7 @@ package com.card_management.technical.handler;
 
 import com.card_management.cards_api.exception.BlockedCardException;
 import com.card_management.cards_api.exception.DuplicateCardException;
+import com.card_management.limits_api.exception.DuplicateLimitException;
 import com.card_management.limits_api.exception.ExceedingLimitException;
 import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.technical.exception.FieldsValidationException;
@@ -37,6 +38,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ExceedingLimitException.class)
     public ResponseEntity<String> handleExceedingLimitException(ExceedingLimitException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateLimitException.class)
+    public ResponseEntity<String> handleDuplicateLimitException(DuplicateLimitException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
     @ExceptionHandler(InsufficientFundsForTransactionException.class)

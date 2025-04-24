@@ -92,7 +92,7 @@ public class Limit {
      * Статус ожидающего обновления лимита
      */
     @Column(name = "has_pending_update")
-    private boolean hasPendingUpdate;
+    private Boolean hasPendingUpdate;
 
     /**
      * Дата и время создания лимита
