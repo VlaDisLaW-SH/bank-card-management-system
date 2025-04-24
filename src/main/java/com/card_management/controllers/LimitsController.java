@@ -1,15 +1,17 @@
 package com.card_management.controllers;
 
-import com.card_management.limits_api.dto.BalancesByLimitDto;
 import com.card_management.limits_api.dto.LimitCreateDto;
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.dto.LimitEnvelopDto;
 import com.card_management.limits_api.service.LimitService;
 import com.card_management.technical.exception.CustomValidationException;
+import com.card_management.users_api.model.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +26,7 @@ public class LimitsController {
 
     @GetMapping(path = "")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LimitEnvelopDto> getLimits(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -35,6 +38,7 @@ public class LimitsController {
 
     @GetMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LimitDto> findById(@PathVariable Long id) {
         var limit = limitService.findById(id);
         return ResponseEntity.ok(limit);
@@ -42,6 +46,7 @@ public class LimitsController {
 
     @PostMapping(path = "")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LimitDto> create(
             @Valid @RequestBody LimitCreateDto limitData,
             BindingResult bindingResult
@@ -55,23 +60,42 @@ public class LimitsController {
                 .body(limit);
     }
 
+    @PostMapping(path = "/setLimit")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> setLimit(
+            @Valid @RequestBody LimitCreateDto limitData,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new CustomValidationException(bindingResult);
+        }
+        var message = limitService.setLimit(limitData);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(message);
+    }
+
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public void remove(@PathVariable Long id) {
         limitService.delete(id);
     }
 
     @GetMapping(path = "/userLimit/{userId}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LimitDto>> getUserLimit(@PathVariable Long userId) {
         var limitsList = limitService.getUserLimits(userId);
         return ResponseEntity.ok(limitsList);
     }
 
-    @GetMapping(path = "/balancesByLimit/{id}")
+    @GetMapping(path = "/my")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<BalancesByLimitDto> getBalancesByLimit(@PathVariable Long id) {
-        var balancesByLimit = limitService.getBalancesByLimit(id);
-        return ResponseEntity.ok(balancesByLimit);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<LimitDto>> getLimitsByUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        var limitsList = limitService.getUserLimits(userDetails.getId());
+        return ResponseEntity.ok(limitsList);
     }
 }

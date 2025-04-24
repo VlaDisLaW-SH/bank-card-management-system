@@ -43,4 +43,24 @@ public interface LimitRepository extends JpaRepository<Limit, Long> {
      * @return список лимитов
      */
     List<Limit> getLimitsByUserId(Long userId);
+
+    /**
+     * Находит и возвращает список лимитов по указанному типу лимита.
+     * @param limitType тип лимита, по которому необходимо выполнить поиск.
+     *                  Не должен быть равен {@code null}.
+     * @return список объектов лимитов, соответствующих заданному типу лимита.
+     *         Если лимиты не найдены, возвращается пустой список.
+     */
+    List<Limit> findByLimitType(LimitType limitType);
+
+    /**
+     * Находит все сущности Limit, соответствующие указанному типу лимита и статусу ожидающего обновления.
+     * @param limitType тип лимита для поиска (не может быть {@code null})
+     * @param hasPendingUpdate флаг статуса ожидающего обновления:
+     *        {@code true} - для лимитов с ожидающими обновлениями,
+     *        {@code false} - для лимитов без ожидающих обновлений
+     * @return список найденных сущностей Limit.
+     *         Возвращает пустой список, если совпадений не найдено.
+     */
+    List<Limit> findByLimitTypeAndHasPendingUpdate(LimitType limitType, boolean hasPendingUpdate);
 }

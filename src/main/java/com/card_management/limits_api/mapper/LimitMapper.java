@@ -1,6 +1,5 @@
 package com.card_management.limits_api.mapper;
 
-import com.card_management.limits_api.dto.BalancesByLimitDto;
 import com.card_management.limits_api.dto.LimitCreateDto;
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.model.Limit;
@@ -20,8 +19,14 @@ public abstract class LimitMapper {
     public abstract Limit map(LimitCreateDto dto);
 
     @Mapping(target = "userUuid", source = "user.uuid")
+    @Mapping(target = "balances", ignore = true)
     public abstract LimitDto map(Limit model);
 
-    @Mapping(target = "userUuid", source = "user.uuid")
-    public abstract BalancesByLimitDto mapBalances(Limit model);
+    @AfterMapping
+    protected void calculateBalance(Limit model, @MappingTarget LimitDto dto) {
+        if (model != null) {
+            var balance = model.getLimitAmount() - (model.getCurrentExpensesAmount());
+            dto.setBalances(balance);
+        }
+    }
 }

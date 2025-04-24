@@ -43,6 +43,11 @@ public class LimitDto {
     private Integer limitAmount;
 
     /**
+     * Сумма остатков по лимиту
+     */
+    private Integer balances;
+
+    /**
      * Дата и время создания лимита
      */
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")

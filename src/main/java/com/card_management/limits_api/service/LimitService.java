@@ -1,6 +1,5 @@
 package com.card_management.limits_api.service;
 
-import com.card_management.limits_api.dto.BalancesByLimitDto;
 import com.card_management.limits_api.dto.LimitCreateDto;
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.dto.LimitEnvelopDto;
@@ -56,11 +55,31 @@ public class LimitService {
         var limitType = LimitType.valueOf(limitDto.getLimitType().toUpperCase());
         var transactionType = TransactionType.valueOf(limitDto.getTransactionType().toUpperCase());
         if (limitRepository.existsByUserIdAndLimitTypeAndTransactionType(userId, limitType, transactionType)) {
-            throw new DuplicateLimitException("Лимит пользователю с ID " + userId + " назначен.");
+            throw new DuplicateLimitException("Лимит пользователю с ID " + userId + " назначен."
+                    + System.lineSeparator() + "Обновите лимит данного типа или удалите его.");
         }
         var limit = limitMapper.map(limitDto);
         limitRepository.save(limit);
         return limitMapper.map(limit);
+    }
+
+    public String setLimit(LimitCreateDto limitDto) {
+        var userId = limitDto.getUserId();
+        var limitType = LimitType.valueOf(limitDto.getLimitType().toUpperCase());
+        var transactionType = TransactionType.valueOf(limitDto.getTransactionType().toUpperCase());
+        var activeLimit = limitRepository.getLimitByUserIdAndLimitTypeAndTransactionType(
+                userId,
+                limitType,
+                transactionType);
+        if (activeLimit == null) {
+            throw new ResourceNotFoundException(limitType.getDescription() + " для типа транзакции "
+                    + transactionType.getDescription() + " не установлен пользователю с ID " + userId
+                    + System.lineSeparator() + "Необходимо создать новый лимит данного типа.");
+        }
+        activeLimit.setPendingLimitAmount(limitDto.getLimitAmount());
+        activeLimit.setHasPendingUpdate(true);
+        limitRepository.save(activeLimit);
+        return "Лимит будет применен в новый расчетный период.";
     }
 
     public void delete(Long id) {
@@ -78,13 +97,14 @@ public class LimitService {
                 .toList();
     }
 
-    public BalancesByLimitDto getBalancesByLimit(Long id) {
-        var limit = limitRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Лимит с ID " + id + " не найден"));
-        var balances = limit.getLimitAmount() - limit.getCurrentExpensesAmount();
-        var balancesByLimit = limitMapper.mapBalances(limit);
-        balancesByLimit.setBalances(balances);
-        return balancesByLimit;
+    public void resetLimitsByType(LimitType limitType) {
+        List<Limit> limits = limitRepository.findByLimitType(limitType);
+
+        for (Limit limit : limits) {
+            limit.setCurrentExpensesAmount(0);
+            limit.setDateLastTransaction(null);
+            limitRepository.save(limit);
+        }
     }
 
     public void canTransaction(Limit limit, Integer amount) {

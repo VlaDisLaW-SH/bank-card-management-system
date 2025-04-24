@@ -44,7 +44,7 @@ public class Limit {
      */
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "user_uuid")
+    @JoinColumn(name = "user_id")
     private User user;
 
     /**
@@ -81,6 +81,18 @@ public class Limit {
      */
     @Column(name = "date_last_transaction")
     private LocalDate dateLastTransaction = null;
+
+    /**
+     * Обновленная сумма лимита
+     */
+    @Column(name = "pending_limit_amount")
+    private Integer pendingLimitAmount;
+
+    /**
+     * Статус ожидающего обновления лимита
+     */
+    @Column(name = "has_pending_update")
+    private boolean hasPendingUpdate;
 
     /**
      * Дата и время создания лимита
