@@ -1,5 +1,6 @@
-package com.card_management.users_api.model;
+package com.card_management.users_api.security;
 
+import com.card_management.users_api.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

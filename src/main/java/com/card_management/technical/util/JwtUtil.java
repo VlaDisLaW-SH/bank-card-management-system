@@ -1,6 +1,6 @@
 package com.card_management.technical.util;
 
-import com.card_management.users_api.model.CustomUserDetails;
+import com.card_management.users_api.security.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

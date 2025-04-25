@@ -4,7 +4,7 @@ import com.card_management.cards_api.dto.*;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.controllers.common.CardValidator;
 import com.card_management.technical.exception.CustomValidationException;
-import com.card_management.users_api.model.CustomUserDetails;
+import com.card_management.users_api.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;

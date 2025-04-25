@@ -6,7 +6,7 @@ import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.dto.LimitEnvelopDto;
 import com.card_management.limits_api.service.LimitService;
 import com.card_management.technical.exception.CustomValidationException;
-import com.card_management.users_api.model.CustomUserDetails;
+import com.card_management.users_api.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

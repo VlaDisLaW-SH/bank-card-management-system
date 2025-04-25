@@ -20,6 +20,7 @@ public abstract class UserMapper {
     @Autowired
     private UserRepository userRepository;
 
+    @Mapping(target = "password", ignore = true)
     public abstract User map(UserCreateDto dto);
 
     public abstract UserDto map(User model);

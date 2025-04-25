@@ -1,17 +1,14 @@
 package com.card_management.controllers;
 
-import com.card_management.limits_api.service.LimitService;
-import com.card_management.users_api.dto.AuthRequest;
 import com.card_management.technical.util.JwtUtil;
+import com.card_management.users_api.dto.AuthRequest;
 import com.card_management.users_api.dto.UserCreateDto;
-import com.card_management.users_api.mapper.UserMapper;
-import com.card_management.users_api.repository.UserRepository;
+import com.card_management.users_api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,18 +21,12 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
-    private final LimitService limitService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserCreateDto userDto) {
-        var user = userMapper.map(userDto);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-        limitService.setDefaultLimits(user);
-        return ResponseEntity.ok("User registered");
+        var user = userService.create(userDto);
+        return ResponseEntity.ok("Пользователь с Email " + user.getEmail() + " зарегистрирован.");
     }
 
     @PostMapping("/login")
