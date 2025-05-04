@@ -6,8 +6,10 @@ import com.card_management.controllers.common.TransactionValidator;
 import com.card_management.limits_api.enumeration.LimitType;
 import com.card_management.limits_api.repository.LimitRepository;
 import com.card_management.limits_api.service.LimitService;
+import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.transaction_api.dto.*;
+import com.card_management.transaction_api.enumeration.TransactionSortFields;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import com.card_management.transaction_api.exception.InsufficientFundsForTransactionException;
 import com.card_management.transaction_api.mapper.TransactionMapper;
@@ -17,6 +19,7 @@ import com.card_management.users_api.repository.UserRepository;
 import com.card_management.users_api.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -46,6 +49,9 @@ public class TransactionService {
     private final CardService cardService;
 
     public TransactionEnvelopDto getTransactions(int page, int size, String sort) {
+        if (!EnumUtils.isValidEnumIgnoreCase(TransactionSortFields.class, sort)) {
+            throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
+        }
         var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
         var transactionPage = transactionRepository.findAll(pageRequest);
         var transactionsDto = transactionPage.stream()
