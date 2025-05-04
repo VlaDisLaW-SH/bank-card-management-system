@@ -7,6 +7,7 @@ import com.card_management.users_api.dto.UserCreateDto;
 import com.card_management.users_api.dto.UserDto;
 import com.card_management.users_api.dto.UserEnvelopDto;
 import com.card_management.users_api.enumeration.UserAccessType;
+import com.card_management.users_api.enumeration.UserSortFields;
 import com.card_management.users_api.exception.DuplicateEmailException;
 import com.card_management.users_api.mapper.UserMapper;
 import com.card_management.users_api.repository.UserRepository;
@@ -30,6 +31,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserEnvelopDto getUsers(int page, int size, String sort) {
+        if (!EnumUtils.isValidEnumIgnoreCase(UserSortFields.class, sort)) {
+            throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
+        }
         var pageRequest = PageRequest.of(page - 1, size, Sort.by(sort));
         var userPage = userRepository.findAll(pageRequest);
         var userDto = userPage.stream()
