@@ -10,7 +10,7 @@ import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.repository.CardRepository;
 import com.card_management.cards_api.specification.CardSpecifications;
 import com.card_management.technical.exception.ResourceNotFoundException;
-import com.card_management.technical.util.CardEncryptor;
+import com.card_management.technical.util.factory.CardEncryptorFactory;
 import com.card_management.users_api.repository.UserRepository;
 import com.card_management.users_api.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +39,8 @@ public class CardService {
 
     private final AppConfig appConfig;
 
+    private final CardEncryptorFactory cardEncryptorFactory;
+
     public CardEnvelopDto getCards(int page, int size, String sort) {
         var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
         var cardPage = cardRepository.findAll(pageRequest);
@@ -65,8 +67,8 @@ public class CardService {
         checkDuplicateCard(cardDto.getCardNumber());
         var card = cardMapper.map(cardDto);
         var salt = KeyGenerators.string().generateKey();
-        var coder = new CardEncryptor(appConfig.getPassword(), salt);
-        var encryptedNumber = coder.encryptCardNumber(cardDto.getCardNumber());
+        var encryptor = cardEncryptorFactory.create(appConfig.getPassword(), salt);
+        var encryptedNumber = encryptor.encryptCardNumber(cardDto.getCardNumber());
         card.setEncryptedCardNumber(encryptedNumber);
         card.setSaltNumberCard(salt);
         cardRepository.save(card);
@@ -155,7 +157,7 @@ public class CardService {
     }
 
     private String decryptCardNumber(Card card) {
-        var decoder = new CardEncryptor(appConfig.getPassword(), card.getSaltNumberCard());
+        var decoder = cardEncryptorFactory.create(appConfig.getPassword(), card.getSaltNumberCard());
         return decoder.decryptCardNumber(card.getEncryptedCardNumber());
     }
 
