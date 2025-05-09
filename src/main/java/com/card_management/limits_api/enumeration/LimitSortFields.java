@@ -1,5 +1,6 @@
 package com.card_management.limits_api.enumeration;
 
+import com.card_management.technical.enumeration.FieldEnumerable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @Schema(enumAsRef = true)
-public enum LimitSortFields {
+public enum LimitSortFields implements FieldEnumerable {
     ID("id"),
     UUID("uuid"),
     USER_UUID("userUuid"),

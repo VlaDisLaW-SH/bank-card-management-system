@@ -5,7 +5,6 @@ import com.card_management.limits_api.dto.LimitCreateDto;
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.dto.LimitEnvelopDto;
 import com.card_management.limits_api.service.LimitService;
-import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.users_api.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,13 +48,7 @@ public class LimitsController {
     @PostMapping(path = "")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<LimitDto> create(
-            @Valid @RequestBody LimitCreateDto limitData,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
+    public ResponseEntity<LimitDto> create(@Valid @RequestBody LimitCreateDto limitData) {
         limitValidator.validateCreateLimit(limitData);
         var limit = limitService.create(limitData);
         return ResponseEntity
@@ -67,13 +59,7 @@ public class LimitsController {
     @PostMapping(path = "/setLimit")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> setLimit(
-            @Valid @RequestBody LimitCreateDto limitData,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
+    public ResponseEntity<String> setLimit(@Valid @RequestBody LimitCreateDto limitData) {
         limitValidator.validateCreateLimit(limitData);
         var message = limitService.setLimit(limitData);
         return ResponseEntity

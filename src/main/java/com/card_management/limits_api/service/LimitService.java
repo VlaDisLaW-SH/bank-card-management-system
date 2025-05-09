@@ -1,6 +1,5 @@
 package com.card_management.limits_api.service;
 
-import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.limits_api.dto.LimitCreateDto;
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.dto.LimitEnvelopDto;
@@ -11,13 +10,13 @@ import com.card_management.limits_api.exception.ExceedingLimitException;
 import com.card_management.limits_api.mapper.LimitMapper;
 import com.card_management.limits_api.model.Limit;
 import com.card_management.limits_api.repository.LimitRepository;
+import com.card_management.technical.enumeration.FieldEnumerable;
 import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import com.card_management.users_api.model.User;
 import com.card_management.users_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class LimitService {
     private final UserRepository userRepository;
 
     public LimitEnvelopDto getLimits(int page, int size, String sort) {
-        if (!EnumUtils.isValidEnumIgnoreCase(LimitSortFields.class, sort)) {
+        if (!FieldEnumerable.containsField(LimitSortFields.class, sort)) {
             throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
         }
         var pageRequest = PageRequest.of(page - 1, size, Sort.by(sort));
