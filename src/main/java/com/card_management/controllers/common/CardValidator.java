@@ -5,6 +5,7 @@ import com.card_management.cards_api.dto.CardCreateDto;
 import com.card_management.cards_api.dto.CardFilterDto;
 import com.card_management.cards_api.enumeration.CardSortFields;
 import com.card_management.cards_api.enumeration.CardStatus;
+import com.card_management.technical.enumeration.FieldEnumerable;
 import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.transaction_api.enumeration.SortDirection;
 import com.card_management.users_api.service.UserService;
@@ -13,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 @Setter
 @Getter
@@ -38,9 +37,7 @@ public class CardValidator {
             validCardStatus(cardFilterDto.getStatus());
         }
         if (cardFilterDto.getSortBy() != null) {
-            boolean isValidSortBy = Arrays.stream(CardSortFields.values())
-                    .anyMatch(field -> field.getField().equals(cardFilterDto.getSortBy()));
-            if (!isValidSortBy) {
+            if (!FieldEnumerable.containsField(CardSortFields.class, cardFilterDto.getSortBy())) {
                 throw new FieldsValidationException("Недопустимое поле сортировки: " + cardFilterDto.getSortBy());
             }
         }

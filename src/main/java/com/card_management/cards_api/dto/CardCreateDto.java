@@ -15,8 +15,8 @@ public class CardCreateDto {
      */
     @NotNull
     @NotBlank
-    @Size(min = 16, max = 16)
-    @CreditCardNumber
+    @Size(min = 16, max = 16, message = "Введите корректный номер карты длиной 16 цифр")
+    @CreditCardNumber(message = "Введите корректный номер карты длиной 16 цифр")
     private String cardNumber;
 
     /**

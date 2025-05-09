@@ -3,7 +3,6 @@ package com.card_management.controllers;
 import com.card_management.cards_api.dto.*;
 import com.card_management.cards_api.service.CardService;
 import com.card_management.controllers.common.CardValidator;
-import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.users_api.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -12,12 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/cards")
 @RequiredArgsConstructor
 public class CardsController {
@@ -49,13 +49,7 @@ public class CardsController {
     @PostMapping(path = "")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CardDto> create(
-            @Valid @RequestBody CardCreateDto cardData,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
+    public ResponseEntity<CardDto> create(@Valid @RequestBody CardCreateDto cardData) {
         cardValidator.validateCreateCard(cardData);
         var card = cardService.create(cardData);
         return ResponseEntity
@@ -101,13 +95,7 @@ public class CardsController {
     @PostMapping(path = "/setStatus")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public void setCardStatus(
-            @Valid @RequestBody CardChangeStatusDto dataDto,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
+    public void setCardStatus(@Valid @RequestBody CardChangeStatusDto dataDto) {
         cardValidator.validateSetCardStatus(dataDto);
         cardService.setCardStatus(
                 dataDto.getOwnerId(),
@@ -119,13 +107,7 @@ public class CardsController {
     @PostMapping(path = "/filter")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CardEnvelopDto> filterCards(
-            @Valid @RequestBody CardAdminFilterDto filterDto,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
+    public ResponseEntity<CardEnvelopDto> filterCards(@Valid @RequestBody CardAdminFilterDto filterDto) {
         cardValidator.validateFilterCard(filterDto.getCardFilterDto());
         var cards = cardService.filterCardsForAdmin(filterDto);
         return ResponseEntity.ok(cards);
@@ -136,12 +118,8 @@ public class CardsController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CardEnvelopDto> filterCards(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CardFilterDto filterDto,
-            BindingResult bindingResult
+            @Valid @RequestBody CardFilterDto filterDto
     ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
         cardValidator.validateFilterCard(filterDto);
         var cards = cardService.filterCards(filterDto, userDetails.getId());
         return ResponseEntity.ok(cards);
