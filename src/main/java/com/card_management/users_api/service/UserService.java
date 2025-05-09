@@ -1,6 +1,7 @@
 package com.card_management.users_api.service;
 
 import com.card_management.limits_api.service.LimitService;
+import com.card_management.technical.enumeration.FieldEnumerable;
 import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.users_api.dto.UserCreateDto;
@@ -31,7 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserEnvelopDto getUsers(int page, int size, String sort) {
-        if (!EnumUtils.isValidEnumIgnoreCase(UserSortFields.class, sort)) {
+        if (!FieldEnumerable.containsField(UserSortFields.class, sort)) {
             throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
         }
         var pageRequest = PageRequest.of(page - 1, size, Sort.by(sort));

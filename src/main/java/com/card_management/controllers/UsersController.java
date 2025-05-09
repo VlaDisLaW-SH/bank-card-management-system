@@ -1,6 +1,5 @@
 package com.card_management.controllers;
 
-import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.users_api.dto.UserCreateDto;
 import com.card_management.users_api.dto.UserDto;
 import com.card_management.users_api.dto.UserEnvelopDto;
@@ -9,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,13 +37,7 @@ public class UsersController {
 
     @PostMapping(path = "")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UserDto> create(
-            @Valid @RequestBody UserCreateDto userData,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserCreateDto userData) {
         var user = userService.create(userData);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
