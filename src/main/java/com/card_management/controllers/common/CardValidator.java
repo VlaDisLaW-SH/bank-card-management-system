@@ -37,9 +37,7 @@ public class CardValidator {
             validCardStatus(cardFilterDto.getStatus());
         }
         if (cardFilterDto.getSortBy() != null) {
-            if (!FieldEnumerable.containsField(CardSortFields.class, cardFilterDto.getSortBy())) {
-                throw new FieldsValidationException("Недопустимое поле сортировки: " + cardFilterDto.getSortBy());
-            }
+            validSortFields(cardFilterDto.getSortBy());
         }
         if (cardFilterDto.getSortDirection() != null) {
             if (!EnumUtils.isValidEnumIgnoreCase(SortDirection.class, cardFilterDto.getSortDirection())) {
@@ -52,6 +50,12 @@ public class CardValidator {
     private void validCardStatus(final String cardStatus) {
         if (!EnumUtils.isValidEnumIgnoreCase(CardStatus.class, cardStatus)) {
             throw new FieldsValidationException("Некорректное значение статуса карты: " + cardStatus);
+        }
+    }
+
+    public void validSortFields(final String sort) {
+        if (!FieldEnumerable.containsField(CardSortFields.class, sort)) {
+            throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
         }
     }
 }

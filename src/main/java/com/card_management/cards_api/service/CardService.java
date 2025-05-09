@@ -2,7 +2,6 @@ package com.card_management.cards_api.service;
 
 import com.card_management.application.configuration.AppConfig;
 import com.card_management.cards_api.dto.*;
-import com.card_management.cards_api.enumeration.CardSortFields;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.cards_api.exception.BlockedCardException;
 import com.card_management.cards_api.exception.DuplicateCardException;
@@ -10,8 +9,7 @@ import com.card_management.cards_api.mapper.CardMapper;
 import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.repository.CardRepository;
 import com.card_management.cards_api.specification.CardSpecifications;
-import com.card_management.technical.enumeration.FieldEnumerable;
-import com.card_management.technical.exception.FieldsValidationException;
+import com.card_management.controllers.common.CardValidator;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.technical.util.factory.CardEncryptorFactory;
 import com.card_management.users_api.repository.UserRepository;
@@ -44,10 +42,10 @@ public class CardService {
 
     private final CardEncryptorFactory cardEncryptorFactory;
 
+    private final CardValidator cardValidator;
+
     public CardEnvelopDto getCards(int page, int size, String sort) {
-        if (!FieldEnumerable.containsField(CardSortFields.class, sort)) {
-            throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
-        }
+        cardValidator.validSortFields(sort);
         var pageRequest = PageRequest.of(page -1, size, Sort.by(sort));
         var cardPage = cardRepository.findAll(pageRequest);
         var cardDto = cardPage.stream()
