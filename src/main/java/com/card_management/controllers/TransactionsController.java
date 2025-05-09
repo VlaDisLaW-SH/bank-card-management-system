@@ -1,7 +1,6 @@
 package com.card_management.controllers;
 
 import com.card_management.controllers.common.TransactionValidator;
-import com.card_management.technical.exception.CustomValidationException;
 import com.card_management.transaction_api.dto.*;
 import com.card_management.transaction_api.service.TransactionService;
 import com.card_management.users_api.security.CustomUserDetails;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -63,12 +61,8 @@ public class TransactionsController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TransactionDto> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody TransactionCreateDto transactionData,
-            BindingResult bindingResult
+            @Valid @RequestBody TransactionCreateDto transactionData
     ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
         transactionValidator.validateCreateTransaction(transactionData, userDetails.getId());
         var transaction = transactionService.create(transactionData, userDetails.getId());
         return ResponseEntity
@@ -135,12 +129,8 @@ public class TransactionsController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TransactionEnvelopDto> filterTransactions(
-            @Valid @RequestBody TransactionAdminFilterDto filterDto,
-            BindingResult bindingResult
+            @Valid @RequestBody TransactionAdminFilterDto filterDto
     ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
         transactionValidator.validateFilterTransaction(filterDto.getTransactionFilterDto());
         var transactions = transactionService.filterTransactionsForAdmin(filterDto);
         return ResponseEntity.ok(transactions);
@@ -151,12 +141,8 @@ public class TransactionsController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TransactionEnvelopDto> filterUserTransactions(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody TransactionFilterDto filterDto,
-            BindingResult bindingResult
+            @Valid @RequestBody TransactionFilterDto filterDto
     ) {
-        if (bindingResult.hasErrors()) {
-            throw new CustomValidationException(bindingResult);
-        }
         transactionValidator.validateFilterTransaction(filterDto);
         var transactions = transactionService.filterTransactions(filterDto, userDetails.getId());
         return ResponseEntity.ok(transactions);

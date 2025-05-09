@@ -2,6 +2,7 @@ package com.card_management.controllers.common;
 
 import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.service.CardService;
+import com.card_management.technical.enumeration.FieldEnumerable;
 import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.transaction_api.dto.TransactionCreateDto;
 import com.card_management.transaction_api.dto.TransactionFilterDto;
@@ -14,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 @Setter
 @Getter
@@ -56,11 +55,7 @@ public class TransactionValidator {
             validTransactionType(filterDto.getTransactionType());
         }
         if (filterDto.getSortBy() != null) {
-            boolean isValidSortBy = Arrays.stream(TransactionSortFields.values())
-                    .anyMatch(field -> field.getField().equals(filterDto.getSortBy()));
-            if (!isValidSortBy) {
-                throw new FieldsValidationException("Недопустимое поле сортировки: " + filterDto.getSortBy());
-            }
+            validSortFields(filterDto.getSortBy());
         }
         if (filterDto.getSortDirection() != null) {
             if (!EnumUtils.isValidEnumIgnoreCase(SortDirection.class, filterDto.getSortDirection())) {
@@ -73,6 +68,12 @@ public class TransactionValidator {
     private void validTransactionType(final String transactionType) {
         if (!EnumUtils.isValidEnumIgnoreCase(TransactionType.class, transactionType)) {
             throw new FieldsValidationException("Некорректное значение типа транзакции: " + transactionType);
+        }
+    }
+
+    public void validSortFields(final String sort) {
+        if (!FieldEnumerable.containsField(TransactionSortFields.class, sort)) {
+            throw new FieldsValidationException("Недопустимое поле сортировки: " + sort);
         }
     }
 }
