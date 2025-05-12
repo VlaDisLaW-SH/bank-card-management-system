@@ -21,9 +21,9 @@ import com.card_management.transaction_api.model.Transaction;
 import com.card_management.transaction_api.repository.TransactionRepository;
 import com.card_management.users_api.model.User;
 import com.card_management.users_api.repository.UserRepository;
-import com.card_management.util.unit_test.CardTestFactory;
-import com.card_management.util.unit_test.TransactionTestFactory;
-import com.card_management.util.unit_test.UserTestFactory;
+import com.card_management.factory.unit.CardTestFactory;
+import com.card_management.factory.unit.TransactionTestFactory;
+import com.card_management.factory.unit.UserTestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -155,12 +155,17 @@ public class TransactionServiceTest {
         int size = 2;
         var invalidSortField = "invalidField";
 
+        doThrow(new FieldsValidationException("Недопустимое поле сортировки: " + invalidSortField))
+                .when(transactionValidator).validSortFields(invalidSortField);
+
         var exception = assertThrows(
                 FieldsValidationException.class,
                 () -> transactionService.getTransactions(page, size, invalidSortField)
         );
+
         assertEquals("Недопустимое поле сортировки: " + invalidSortField, exception.getMessage());
 
+        verify(transactionValidator).validSortFields(invalidSortField);
         verifyNoInteractions(transactionRepository);
         verifyNoInteractions(transactionMapper);
     }

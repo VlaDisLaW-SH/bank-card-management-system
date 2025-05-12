@@ -1,4 +1,4 @@
-package com.card_management.util.unit_test;
+package com.card_management.factory.unit;
 
 import com.card_management.limits_api.dto.LimitDto;
 import com.card_management.limits_api.enumeration.LimitType;

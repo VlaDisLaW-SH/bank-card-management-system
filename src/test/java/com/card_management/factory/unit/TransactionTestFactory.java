@@ -1,4 +1,4 @@
-package com.card_management.util.unit_test;
+package com.card_management.factory.unit;
 
 import com.card_management.cards_api.model.Card;
 import com.card_management.transaction_api.dto.TransactionDto;

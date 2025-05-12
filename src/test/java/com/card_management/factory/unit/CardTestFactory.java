@@ -1,4 +1,4 @@
-package com.card_management.util.unit_test;
+package com.card_management.factory.unit;
 
 import com.card_management.cards_api.dto.CardDto;
 import com.card_management.cards_api.enumeration.CardStatus;

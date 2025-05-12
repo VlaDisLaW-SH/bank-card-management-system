@@ -11,7 +11,7 @@ import com.card_management.users_api.mapper.UserMapper;
 import com.card_management.users_api.model.User;
 import com.card_management.users_api.repository.UserRepository;
 import com.card_management.users_api.service.UserService;
-import com.card_management.util.unit_test.UserTestFactory;
+import com.card_management.factory.unit.UserTestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
