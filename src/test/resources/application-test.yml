@@ -13,3 +13,6 @@ spring:
 jwt:
   secret: testSecretKeyMustBeAtLeast32CharsLong!
   expiration: 3600000
+card:
+  encryptor:
+    password: ${CARD_ENCRYPTOR_PASSWORD}
