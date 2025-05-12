@@ -10,13 +10,14 @@ import com.card_management.cards_api.exception.DuplicateCardException;
 import com.card_management.cards_api.mapper.CardMapper;
 import com.card_management.cards_api.model.Card;
 import com.card_management.cards_api.repository.CardRepository;
+import com.card_management.controllers.common.CardValidator;
 import com.card_management.technical.exception.ResourceNotFoundException;
 import com.card_management.technical.util.CardEncryptor;
 import com.card_management.technical.util.factory.CardEncryptorFactory;
 import com.card_management.users_api.model.User;
 import com.card_management.users_api.repository.UserRepository;
-import com.card_management.util.unit_test.CardTestFactory;
-import com.card_management.util.unit_test.UserTestFactory;
+import com.card_management.factory.unit.CardTestFactory;
+import com.card_management.factory.unit.UserTestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,9 @@ class CardServiceTest {
 
     @Mock
     private CardRepository cardRepository;
+
+    @Mock
+    private CardValidator cardValidator;
 
     @Mock
     private UserRepository userRepository;
@@ -97,6 +101,8 @@ class CardServiceTest {
                 cards,
                 PageRequest.of(0, 2, Sort.by("id")), 2);
 
+        doNothing().when(cardValidator).validSortFields("id");
+
         when(cardRepository.findAll(
                 PageRequest.of(0, 2, Sort.by("id")))).thenReturn(cardPage);
         when(cardMapper.map(card1)).thenReturn(cardDto1);
@@ -107,23 +113,37 @@ class CardServiceTest {
         assertEquals(2, result.getCards().size());
         assertEquals(2, result.getTotalElements());
         assertEquals(1, result.getTotalPages());
+
+        verify(cardValidator).validSortFields("id");
+        verify(cardMapper).map(card1);
+        verify(cardMapper).map(card2);
     }
 
     @Test
     void getCards_returnsEmptyResult_whenNoCardsExist() {
+        var sortField = "id";
+        var page = 0;
+        var size = 2;
+
         Page<Card> emptyPage = new PageImpl<>(
                 List.of(),
-                PageRequest.of(0, 2, Sort.by("id")), 0);
+                PageRequest.of(page, size, Sort.by(sortField)), 0);
+
+        doNothing().when(cardValidator).validSortFields(sortField);
 
         when(cardRepository.findAll(
-                PageRequest.of(0, 2, Sort.by("id")))).thenReturn(emptyPage);
+                PageRequest.of(page, size, Sort.by(sortField)))).thenReturn(emptyPage);
 
-        CardEnvelopDto result = cardService.getCards(1, 2, "id");
+        CardEnvelopDto result = cardService.getCards(page + 1, size, sortField);
 
         assertNotNull(result);
         assertTrue(result.getCards().isEmpty());
         assertEquals(0, result.getTotalElements());
         assertEquals(0, result.getTotalPages());
+
+        verify(cardValidator).validSortFields(sortField);
+        verify(cardRepository).findAll(PageRequest.of(page, size, Sort.by(sortField)));
+        verifyNoInteractions(cardMapper);
     }
 
     @Test
