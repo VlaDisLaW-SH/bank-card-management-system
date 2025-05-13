@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true, description = "Роль пользователя в системе")
 public enum UserAccessType {
     ADMIN("Администратор"),
     USER("Пользователь");
