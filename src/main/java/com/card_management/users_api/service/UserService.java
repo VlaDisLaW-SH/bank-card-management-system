@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +54,7 @@ public class UserService {
         return userMapper.map(user);
     }
 
+    @Transactional
     public UserDto create(UserCreateDto userDto) {
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new DuplicateEmailException("Email уже используется");
