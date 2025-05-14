@@ -19,11 +19,13 @@ import com.card_management.transaction_api.exception.InsufficientFundsForTransac
 import com.card_management.transaction_api.mapper.TransactionMapper;
 import com.card_management.transaction_api.model.Transaction;
 import com.card_management.transaction_api.repository.TransactionRepository;
+import com.card_management.users_api.dto.UserDto;
 import com.card_management.users_api.model.User;
 import com.card_management.users_api.repository.UserRepository;
 import com.card_management.factory.unit.CardTestFactory;
 import com.card_management.factory.unit.TransactionTestFactory;
 import com.card_management.factory.unit.UserTestFactory;
+import com.card_management.users_api.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,6 +68,9 @@ public class TransactionServiceTest {
 
     @Mock
     private CardService cardService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -204,11 +209,16 @@ public class TransactionServiceTest {
 
     @Test
     void createTransaction_success() {
-        when(transactionValidator.getSourceEntity()).thenReturn(card1);
-        when(transactionValidator.getDestinationEntity()).thenReturn(card2);
+        var userDto = new UserDto();
+        userDto.setId(1L);
+        when(userService.findById(1L)).thenReturn(userDto);
+        when(cardService.findMatchByNumberCard("1234567812341001", 1L)).thenReturn(card1);
+        when(cardService.findMatchByNumberCard("1234567812341002", 1L)).thenReturn(card2);
+        doNothing().when(cardService).checkCardStatus(card1);
+        doNothing().when(cardService).checkCardStatus(card2);
         when(transactionMapper.map(transactionCreateDto, 1L)).thenReturn(transaction1);
-        when(transactionMapper.map(any(Transaction.class))).thenReturn(transactionDto1);
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction1);
+        when(transactionMapper.map(transaction1)).thenReturn(transactionDto1);
 
         var result = transactionService.create(transactionCreateDto, 1L);
 
@@ -218,14 +228,20 @@ public class TransactionServiceTest {
         assertEquals(TransactionType.TRANSFER, result.getTransactionType());
         assertEquals(100, result.getAmount());
 
+        verify(cardService).checkCardStatus(card1);
+        verify(cardService).checkCardStatus(card2);
         verify(transactionRepository).save(transaction1);
     }
 
     @Test
     void createTransaction_shouldThrowException_whenInsufficientFunds() {
         transactionCreateDto.setAmount(2000);
+        var userDto = new UserDto();
+        userDto.setId(1L);
 
-        when(transactionValidator.getSourceEntity()).thenReturn(card1);
+        when(userService.findById(1L)).thenReturn(userDto);
+        when(cardService.findMatchByNumberCard("1234567812341001", 1L)).thenReturn(card1);
+        doNothing().when(cardService).checkCardStatus(card1);
 
         var exception = assertThrows(InsufficientFundsForTransactionException.class, () ->
                 transactionService.create(transactionCreateDto, 1L)
