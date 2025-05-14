@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Schema(enumAsRef = true)
 public enum TransactionSortFields implements FieldEnumerable {
+    ID("id"),
     UUID("uuid"),
     USER_UUID("userUuid"),
     MASKED_SOURCE("maskedSource"),

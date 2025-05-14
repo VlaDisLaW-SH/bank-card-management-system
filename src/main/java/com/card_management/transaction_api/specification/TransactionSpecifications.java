@@ -5,8 +5,10 @@ import com.card_management.transaction_api.model.Transaction;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,8 +70,12 @@ public class TransactionSpecifications {
             }
 
             if (filter.getExactDate() != null) {
-                LocalDateTime startOfDay = filter.getExactDate().atStartOfDay();
-                LocalDateTime endOfDay = filter.getExactDate().atTime(LocalTime.MAX);
+                LocalDate exactDate = LocalDate.parse(
+                        filter.getExactDate(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime startOfDay = exactDate.atStartOfDay();
+                LocalDateTime endOfDay = exactDate.atTime(LocalTime.MAX);
 
                 predicates.add(criteriaBuilder.between(
                         root.get("createdAt"),
@@ -79,7 +85,11 @@ public class TransactionSpecifications {
             }
 
             if (filter.getCreatedAfter() != null) {
-                LocalDateTime startOfDay = filter.getCreatedAfter().atStartOfDay();
+                LocalDate createdAfter = LocalDate.parse(
+                        filter.getCreatedAfter(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime startOfDay = createdAfter.atStartOfDay();
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
                         root.get("createdAt"),
                         startOfDay
@@ -87,7 +97,11 @@ public class TransactionSpecifications {
             }
 
             if (filter.getCreatedBefore() != null) {
-                LocalDateTime endOfDay = filter.getCreatedBefore().atTime(LocalTime.MAX);
+                LocalDate createdBefore = LocalDate.parse(
+                        filter.getCreatedBefore(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime endOfDay = createdBefore.atTime(LocalTime.MAX);
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
                         root.get("createdAt"),
                         endOfDay

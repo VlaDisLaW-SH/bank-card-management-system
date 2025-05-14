@@ -1,13 +1,11 @@
 package com.card_management.transaction_api.dto;
 
+import com.card_management.technical.validation.ValidFormatDate;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
 
 @Setter
 @Getter
@@ -73,18 +71,18 @@ public class TransactionFilterDto {
     /**
      * Дата создания транзакции (точное значение)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate exactDate;
+    @ValidFormatDate
+    private String exactDate;
 
     /**
      * Дата транзакций созданных после указанного значения (включительно)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate createdAfter;
+    @ValidFormatDate
+    private String createdAfter;
 
     /**
      * Дата транзакций созданных до указанного значения (включительно)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate createdBefore;
+    @ValidFormatDate
+    private String createdBefore;
 }
