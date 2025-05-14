@@ -5,8 +5,10 @@ import com.card_management.cards_api.model.Card;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,8 +82,12 @@ public class CardSpecifications {
             }
 
             if (filter.getExactCreationDate() != null) {
-                LocalDateTime startOfDay = filter.getExactCreationDate().atStartOfDay();
-                LocalDateTime endOfDay = filter.getExactCreationDate().atTime(LocalTime.MAX);
+                LocalDate exactCreationDate = LocalDate.parse(
+                        filter.getExactCreationDate(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime startOfDay = exactCreationDate.atStartOfDay();
+                LocalDateTime endOfDay = exactCreationDate.atTime(LocalTime.MAX);
 
                 predicates.add(criteriaBuilder.between(
                         root.get("createdAt"),
@@ -91,7 +97,11 @@ public class CardSpecifications {
             }
 
             if (filter.getCreatedAfter() != null) {
-                LocalDateTime startOfDay = filter.getCreatedAfter().atStartOfDay();
+                LocalDate createdAfter = LocalDate.parse(
+                        filter.getCreatedAfter(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime startOfDay = createdAfter.atStartOfDay();
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
                         root.get("createdAt"),
                         startOfDay
@@ -99,7 +109,11 @@ public class CardSpecifications {
             }
 
             if (filter.getCreatedBefore() != null) {
-                LocalDateTime endOfDay = filter.getCreatedBefore().atTime(LocalTime.MAX);
+                LocalDate createdBefore = LocalDate.parse(
+                        filter.getCreatedBefore(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime endOfDay = createdBefore.atTime(LocalTime.MAX);
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
                         root.get("createdAt"),
                         endOfDay
@@ -107,8 +121,12 @@ public class CardSpecifications {
             }
 
             if (filter.getExactUpdateDate() != null) {
-                LocalDateTime startOfDay = filter.getExactUpdateDate().atStartOfDay();
-                LocalDateTime endOfDay = filter.getExactUpdateDate().atTime(LocalTime.MAX);
+                LocalDate exactUpdateDate = LocalDate.parse(
+                        filter.getExactUpdateDate(),
+                        DateTimeFormatter.ISO_DATE
+                );
+                LocalDateTime startOfDay = exactUpdateDate.atStartOfDay();
+                LocalDateTime endOfDay = exactUpdateDate.atTime(LocalTime.MAX);
 
                 predicates.add(criteriaBuilder.between(
                         root.get("updatedAt"),

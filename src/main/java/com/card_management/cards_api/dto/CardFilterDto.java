@@ -1,12 +1,13 @@
 package com.card_management.cards_api.dto;
 
-import jakarta.validation.constraints.*;
+import com.card_management.technical.validation.ValidFormatDate;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
 
 @Setter
 @Getter
@@ -92,24 +93,24 @@ public class CardFilterDto {
     /**
      * Дата создания карты (точное значение)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate exactCreationDate;
+    @ValidFormatDate
+    private String exactCreationDate;
 
     /**
      * Дата карт созданных после указанного значения (включительно)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate createdAfter;
+    @ValidFormatDate
+    private String createdAfter;
 
     /**
      * Дата карт созданных до указанного значения (включительно)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate createdBefore;
+    @ValidFormatDate
+    private String createdBefore;
 
     /**
      * Дата обновления карты (точное значение)
      */
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate exactUpdateDate;
+    @ValidFormatDate
+    private String exactUpdateDate;
 }
