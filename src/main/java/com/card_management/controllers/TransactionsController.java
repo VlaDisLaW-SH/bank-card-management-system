@@ -63,7 +63,7 @@ public class TransactionsController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody TransactionCreateDto transactionData
     ) {
-        transactionValidator.validateCreateTransaction(transactionData, userDetails.getId());
+        transactionValidator.validateCreateTransaction(transactionData);
         var transaction = transactionService.create(transactionData, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)

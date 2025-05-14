@@ -67,8 +67,10 @@ public class TransactionService {
 
     @Transactional
     public TransactionDto create(TransactionCreateDto transactionDto, Long userId) {
+        var user = userService.findById(userId);
         processingLimits(transactionDto, userId);
-        var sourceEntity = transactionValidator.getSourceEntity();
+        var sourceEntity = cardService.findMatchByNumberCard(transactionDto.getSourceNumber(), user.getId());
+        cardService.checkCardStatus(sourceEntity);
         checkBalancesCard(sourceEntity, transactionDto.getAmount());
         sourceEntity.setBalance(sourceEntity.getBalance() - transactionDto.getAmount());
 
@@ -76,7 +78,8 @@ public class TransactionService {
         transaction.setSource(sourceEntity);
         sourceEntity.getOutgoingTransactions().add(transaction);
         if (transactionDto.getDestinationNumber() != null) {
-            var destinationEntity = transactionValidator.getDestinationEntity();
+            var destinationEntity = cardService.findMatchByNumberCard(transactionDto.getDestinationNumber(), user.getId());
+            cardService.checkCardStatus(destinationEntity);
             destinationEntity.setBalance(destinationEntity.getBalance() + transactionDto.getAmount());
             transaction.setDestination(destinationEntity);
             destinationEntity.getIncomingTransactions().add(transaction);
