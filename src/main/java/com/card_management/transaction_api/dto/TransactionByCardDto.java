@@ -21,6 +21,6 @@ public class TransactionByCardDto {
      */
     @NotNull
     @NotBlank
-    @Size(min = 4, max = 4)
+    @Size(min = 4, max = 4, message = "Введите 4 последние цифры номера карты")
     private String cardLastFourDigits;
 }
