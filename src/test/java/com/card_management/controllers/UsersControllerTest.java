@@ -173,7 +173,7 @@ public class UsersControllerTest {
                 .andExpect(jsonPath("$.errors").isArray())
                 .andExpect(jsonPath("$.errors.length()").value(1))
                 .andExpect(jsonPath("$.errors[?(@.field == 'email')].message")
-                        .value("must be a well-formed email address"));
+                        .value("Некорректный формат email"));
     }
 
     @Test
