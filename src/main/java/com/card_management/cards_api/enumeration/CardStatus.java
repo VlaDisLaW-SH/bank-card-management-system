@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true, description = "Тип статуса карты")
 public enum CardStatus {
     ACTIVE("Карта активна."),
     BLOCKED("Карта заблокирована."),
