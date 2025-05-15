@@ -13,23 +13,12 @@ import java.util.List;
 @Schema(description = "Обертка для постраничного списка пользователей")
 public class UserEnvelopDto {
 
-    @Schema(
-            description = "Список пользователей",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
+    @Schema(description = "Список пользователей")
     private List<UserDto> users;
 
-    @Schema(
-            description = "Общее количество элементов",
-            example = "10",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
+    @Schema(description = "Общее количество элементов", example = "10")
     private long totalElements;
 
-    @Schema(
-            description = "Общее количество страниц",
-            example = "5",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
+    @Schema(description = "Общее количество страниц", example = "5")
     private int totalPages;
 }

@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true, description = "Типы лимитов")
 public enum LimitType {
     DAILY("Суточный лимит"),
     MONTHLY("Месячный лимит");
