@@ -173,6 +173,41 @@ public class TransactionsController {
     }
 
     @Operation(
+            summary = "Получить транзакции по последним 4 цифрам карты (для ADMIN)",
+            description = "Возвращает транзакции по последним 4 цифрам карты и ID пользователя. Только для ADMIN.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Транзакции успешно получены",
+                    content = @Content(schema = @Schema(implementation = TransactionEnvelopDto.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещен",
+                    content = @Content(schema = @Schema(hidden = true))
+            )
+    })
+    @PostMapping(path = "/transactionsByCard")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TransactionEnvelopDto> getCardTransactions(
+            @Parameter(description = "Данные для фильтрации по карте", required = true)
+            @Valid @RequestBody TransactionByCardDto transactionByCardDto,
+            @Parameter(description = "Номер страницы", example = "1") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Размер страницы", example = "10") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Поле сортировки", example = "id") @RequestParam(defaultValue = "id") String sort
+    ) {
+        TransactionEnvelopDto transactionEnvelopDto = transactionService.getCardTransactionsForAdmin(
+                transactionByCardDto,
+                page,
+                size,
+                sort
+        );
+        return ResponseEntity.ok(transactionEnvelopDto);
+    }
+
+    @Operation(
             summary = "Получить транзакции по последним цифрам карты (для текущего пользователя)",
             description = "Возвращает транзакции по последним 4 цифрам карты. Только для USER.",
             security = @SecurityRequirement(name = "bearerAuth")
