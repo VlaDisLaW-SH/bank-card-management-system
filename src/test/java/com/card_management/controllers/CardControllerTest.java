@@ -289,11 +289,11 @@ public class CardControllerTest {
                 .andExpect(jsonPath("$.errors").isArray())
                 .andExpect(jsonPath("$.errors.length()").value(3))
                 .andExpect(jsonPath("$.errors[?(@.field == 'ownerId')].message")
-                        .value("must not be null"))
+                        .value("ID владельца обязателен"))
                 .andExpect(jsonPath("$.errors[?(@.field == 'lastFourDigitsCardNumber')].message")
                         .value("Введите 4 последние цифры номера карты"))
                 .andExpect(jsonPath("$.errors[?(@.field == 'status')].message")
-                        .value("must not be empty"));
+                        .value("Статус не должен быть пустым"));
     }
 
     @Test
