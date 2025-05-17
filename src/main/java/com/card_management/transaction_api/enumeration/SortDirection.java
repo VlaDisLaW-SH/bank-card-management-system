@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@Schema(enumAsRef = true)
+@Schema(description = "Допустимые значения для направления сортировки")
 public enum SortDirection {
     ASC("По возрастанию"),
     DESC("По убыванию");

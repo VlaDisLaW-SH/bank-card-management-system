@@ -15,10 +15,7 @@ public class CardAdminFilterDto {
     @Schema(description = "ID владельца карты", example = "1001")
     private Long ownerId;
 
-    @Schema(
-            description = "Объект с параметрами фильтрации карт",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
+    @Schema(description = "Объект с параметрами фильтрации карт")
     @Valid
     private CardFilterDto cardFilterDto;
 }

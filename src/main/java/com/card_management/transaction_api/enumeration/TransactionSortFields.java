@@ -1,6 +1,7 @@
 package com.card_management.transaction_api.enumeration;
 
 import com.card_management.technical.enumeration.FieldEnumerable;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@Schema(enumAsRef = true)
+@Schema(description = "Допустимые значения для сортировки транзакции")
 public enum TransactionSortFields implements FieldEnumerable {
     ID("id"),
     UUID("uuid"),
@@ -22,4 +23,10 @@ public enum TransactionSortFields implements FieldEnumerable {
     CREATED_AT("createdAt");
 
     private final String field;
+
+    @Override
+    @JsonValue
+    public String toString() {
+        return field;
+    }
 }
