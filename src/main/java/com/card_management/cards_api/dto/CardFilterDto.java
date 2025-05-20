@@ -3,7 +3,7 @@ package com.card_management.cards_api.dto;
 import com.card_management.cards_api.enumeration.CardSortFields;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.technical.validation.ValidFormatDate;
-import com.card_management.transaction_api.enumeration.SortDirection;
+import com.card_management.technical.enumeration.SortDirection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

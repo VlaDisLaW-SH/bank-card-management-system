@@ -1,7 +1,7 @@
 package com.card_management.transaction_api.dto;
 
 import com.card_management.technical.validation.ValidFormatDate;
-import com.card_management.transaction_api.enumeration.SortDirection;
+import com.card_management.technical.enumeration.SortDirection;
 import com.card_management.transaction_api.enumeration.TransactionSortFields;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;

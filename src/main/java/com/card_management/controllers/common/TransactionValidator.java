@@ -4,7 +4,7 @@ import com.card_management.technical.enumeration.FieldEnumerable;
 import com.card_management.technical.exception.FieldsValidationException;
 import com.card_management.transaction_api.dto.TransactionCreateDto;
 import com.card_management.transaction_api.dto.TransactionFilterDto;
-import com.card_management.transaction_api.enumeration.SortDirection;
+import com.card_management.technical.enumeration.SortDirection;
 import com.card_management.transaction_api.enumeration.TransactionSortFields;
 import com.card_management.transaction_api.enumeration.TransactionType;
 import lombok.RequiredArgsConstructor;

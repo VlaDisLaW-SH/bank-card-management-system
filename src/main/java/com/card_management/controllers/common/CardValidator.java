@@ -7,7 +7,7 @@ import com.card_management.cards_api.enumeration.CardSortFields;
 import com.card_management.cards_api.enumeration.CardStatus;
 import com.card_management.technical.enumeration.FieldEnumerable;
 import com.card_management.technical.exception.FieldsValidationException;
-import com.card_management.transaction_api.enumeration.SortDirection;
+import com.card_management.technical.enumeration.SortDirection;
 import com.card_management.users_api.service.UserService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
