@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+
+    <changeSet id="create-limits-table" author="Shulikov Vladislav">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="limits"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="limits">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="uuid" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="limit_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="limit_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_expenses_amount" type="INTEGER" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_last_transaction" type="DATE"/>
+            <column name="pending_limit_amount" type="INTEGER"/>
+            <column name="has_pending_update" type="BOOLEAN"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="limits"
+                baseColumnNames="user_id"
+                constraintName="fk_limit_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <createIndex indexName="idx_limits_uuid" tableName="limits">
+            <column name="uuid"/>
+        </createIndex>
+
+        <createIndex indexName="idx_limits_user_id" tableName="limits">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_limits_limit_type" tableName="limits">
+            <column name="limit_type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_limits_transaction_type" tableName="limits">
+            <column name="transaction_type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_limits_created_at" tableName="limits">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_limits_updated_at" tableName="limits">
+            <column name="updated_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="limits" constraintName="fk_limit_user"/>
+
+            <dropIndex indexName="idx_limits_uuid" tableName="limits"/>
+            <dropIndex indexName="idx_limits_user_id" tableName="limits"/>
+            <dropIndex indexName="idx_limits_limit_type" tableName="limits"/>
+            <dropIndex indexName="idx_limits_transaction_type" tableName="limits"/>
+            <dropIndex indexName="idx_limits_created_at" tableName="limits"/>
+            <dropIndex indexName="idx_limits_updated_at" tableName="limits"/>
+
+            <dropTable tableName="limits"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>

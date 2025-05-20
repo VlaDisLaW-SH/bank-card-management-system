@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+
+    <changeSet id="create-cards-table" author="Shulikov Vladislav">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="cards"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="cards">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="uuid" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="encrypted_card_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mask_number" type="VARCHAR(16)"/>
+            <column name="owner_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validity_period_month" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validity_period_year" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balance" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="salt_number_card" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="cards"
+                baseColumnNames="owner_id"
+                constraintName="fk_card_owner"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <createIndex indexName="idx_cards_uuid" tableName="cards">
+            <column name="uuid"/>
+        </createIndex>
+
+        <createIndex indexName="idx_cards_owner_id" tableName="cards">
+            <column name="owner_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_cards_status" tableName="cards">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex indexName="idx_cards_created_at" tableName="cards">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_cards_updated_at" tableName="cards">
+            <column name="updated_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="cards" constraintName="fk_card_owner"/>
+
+            <dropIndex indexName="idx_cards_uuid" tableName="cards"/>
+            <dropIndex indexName="idx_cards_owner_id" tableName="cards"/>
+            <dropIndex indexName="idx_cards_status" tableName="cards"/>
+            <dropIndex indexName="idx_cards_created_at" tableName="cards"/>
+            <dropIndex indexName="idx_cards_updated_at" tableName="cards"/>
+
+            <dropTable tableName="cards"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>
